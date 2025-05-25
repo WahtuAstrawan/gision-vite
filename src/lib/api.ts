@@ -44,6 +44,26 @@ export const registerUser = async (userData: RegisterRequest) => {
   }
 };
 
+export const getUser = async (token: string) => {
+  try {
+    const response = await fetch(`${BASE_URL}/user`, {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error("Get user failed");
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error("Get user failed:", error);
+    throw error;
+  }
+};
+
 export const fetchAllRegion = async (token: string) => {
   try {
     const response = await fetch(`${BASE_URL}/mregion`, {

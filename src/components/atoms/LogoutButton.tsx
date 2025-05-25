@@ -1,21 +1,20 @@
-import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
+import { LogOut } from "lucide-react";
 import { logout } from "@/lib/api";
 
-export default function ProfileButton() {
+export default function LogoutButton() {
   const navigate = useNavigate();
 
   const handleLogOut = async () => {
     try {
       const token = localStorage.getItem("token");
-
       const response = await logout(token || "");
 
       if (response.meta?.code === 200) {
         toast.success(response.meta.message || "Logout successfully");
         localStorage.clear();
-        navigate("/");
+        setTimeout(() => navigate("/"), 2000);
       } else {
         toast.error(response.meta?.message || "Logout failed");
       }
@@ -24,5 +23,10 @@ export default function ProfileButton() {
     }
   };
 
-  return <Button onClick={handleLogOut}>Logout</Button>;
+  return (
+    <div onClick={handleLogOut} className="flex items-center">
+      <LogOut className="mr-2" />
+      Logout
+    </div>
+  );
 }

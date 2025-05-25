@@ -20,7 +20,7 @@ export default function ListRegion() {
         } else if (response.code === 403) {
           console.error("Forbidden to fetch all region.");
           localStorage.clear();
-          navigate("/");
+          setTimeout(() => navigate("/"), 2000);
         }
       } catch (err) {
         console.error("An error occurred while fetching data:", err);
