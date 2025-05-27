@@ -1,4 +1,4 @@
-import type { LoginRequest, RegisterRequest } from "./types";
+import type { AddRoadRequest, LoginRequest, RegisterRequest } from "./types";
 
 const BASE_URL = "https://gisapis.manpits.xyz/api";
 
@@ -64,7 +64,7 @@ export const getUser = async (token: string) => {
   }
 };
 
-export const fetchAllRegion = async (token: string) => {
+export const getAllRegion = async (token: string) => {
   try {
     const response = await fetch(`${BASE_URL}/mregion`, {
       headers: {
@@ -101,6 +101,155 @@ export const logout = async (token: string) => {
     return await response.json();
   } catch (error) {
     console.error("Logout error:", error);
+    throw error;
+  }
+};
+
+export const getAllRoads = async (token: string) => {
+  try {
+    const response = await fetch(`${BASE_URL}/ruasjalan`, {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error("Fetch all roads failed");
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error("Fetch all roads error:", error);
+    throw error;
+  }
+};
+
+export const getRoadMaterial = async (token: string) => {
+  try {
+    const response = await fetch(`${BASE_URL}/meksisting`, {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error("Fetch road material failed");
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error("Fetch road material error:", error);
+    throw error;
+  }
+};
+
+export const getRoadType = async (token: string) => {
+  try {
+    const response = await fetch(`${BASE_URL}/mjenisjalan`, {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error("Fetch road type failed");
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error("Fetch road type error:", error);
+    throw error;
+  }
+};
+
+export const getRoadCondition = async (token: string) => {
+  try {
+    const response = await fetch(`${BASE_URL}/mkondisi`, {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error("Fetch road condition failed");
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error("Fetch road condition error:", error);
+    throw error;
+  }
+};
+
+export const addRoad = async (roadData: AddRoadRequest, token: string) => {
+  try {
+    const response = await fetch(`${BASE_URL}/ruasjalan`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(roadData),
+    });
+
+    if (!response.ok) {
+      throw new Error("Add road failed");
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error("Add road error:", error);
+    throw error;
+  }
+};
+
+export const updateRoadById = async (
+  roadId: number,
+  roadData: AddRoadRequest,
+  token: string
+) => {
+  try {
+    const response = await fetch(`${BASE_URL}/ruasjalan/${roadId}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(roadData),
+    });
+
+    if (!response.ok) {
+      throw new Error("Update road failed");
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error("Update road error:", error);
+    throw error;
+  }
+};
+
+export const deleteRoadById = async (roadId: number, token: string) => {
+  try {
+    const response = await fetch(`${BASE_URL}/ruasjalan/${roadId}`, {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error("Add road failed");
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error("Add road error:", error);
     throw error;
   }
 };

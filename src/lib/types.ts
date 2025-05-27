@@ -9,6 +9,19 @@ export type RegisterRequest = {
   password: string;
 };
 
+export type AddRoadRequest = {
+  paths: string;
+  desa_id: number;
+  kode_ruas: string;
+  nama_ruas: string;
+  panjang: number;
+  lebar: number;
+  eksisting_id: number;
+  kondisi_id: number;
+  jenisjalan_id: number;
+  keterangan: string;
+};
+
 export type RegionResponse = {
   code: number;
   status: string;
@@ -37,4 +50,62 @@ export type UserResponse = {
   data: {
     user: User;
   };
+};
+
+export type Road = {
+  id: number;
+  paths: string;
+  desa_id: number;
+  kode_ruas: string;
+  nama_ruas: string;
+  panjang: number;
+  lebar: number;
+  eksisting_id: number;
+  kondisi_id: number;
+  jenisjalan_id: number;
+  keterangan: string;
+};
+
+export type AllRoadsResponse = {
+  code: number;
+  user: User;
+  "token-expired": number;
+  status: string;
+  ruasjalan: Road[];
+};
+
+export type RoadMaterial = {
+  id: number;
+  eksisting: string;
+};
+
+export type RoadMaterialResponse = {
+  code: number;
+  "token-expired": number;
+  status: string;
+  eksisting: RoadMaterial[];
+};
+
+export type RoadTypeItem = {
+  id: number;
+  jenisjalan: string;
+};
+
+export type RoadType = {
+  code: number;
+  "token-expired": number;
+  status: string;
+  eksisting: RoadTypeItem[];
+};
+
+export type RoadConditionItem = {
+  id: number;
+  kondisi: string;
+};
+
+export type RoadCondition = {
+  code: number;
+  "token-expired": number;
+  status: string;
+  eksisting: RoadConditionItem[];
 };
