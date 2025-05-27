@@ -13,8 +13,54 @@ import {
   SidebarTrigger,
 } from "@/components/ui/sidebar";
 import { Toaster } from "@/components/ui/sonner";
+import { useMenuStore } from "@/stores/menuStore";
+import RoadSection from "@/components/organisms/RoadSection";
+import { useEffect, useState } from "react";
+import { getAllRoads } from "@/lib/api";
+import { type AllRoadsResponse, type Road } from "@/lib/types";
+import { useAuthStore } from "@/stores/authStore";
+import { toast } from "sonner";
+import { useNavigate } from "react-router-dom";
 
 const Home = () => {
+  const { currentMenu } = useMenuStore();
+  const { token } = useAuthStore();
+  const navigate = useNavigate();
+
+  const [roads, setRoads] = useState<Road[]>([]);
+
+  useEffect(() => {
+    const fetchRoads = async () => {
+      try {
+        const res: AllRoadsResponse = await getAllRoads(token || "");
+        if (res.code === 200) {
+          setRoads(res.ruasjalan);
+        } else if (res.code >= 400 && res.code < 500) {
+          toast.warning("Login session expired.");
+          setTimeout(() => navigate("/"), 2000);
+        } else toast.error("Internal server error.");
+      } catch (err) {
+        console.error("Failed to fetch roads:", err);
+        toast.error("Failed to fetch roads");
+      }
+    };
+
+    if (currentMenu === "Maps") {
+      fetchRoads();
+    }
+  }, [currentMenu]);
+
+  const renderContent = () => {
+    switch (currentMenu) {
+      case "Maps":
+        return <Map roads={roads} />;
+      case "Roads":
+        return <RoadSection />;
+      default:
+        return <Map roads={roads} />;
+    }
+  };
+
   return (
     <SidebarProvider>
       <AppSidebar />
@@ -26,8 +72,8 @@ const Home = () => {
             <Breadcrumb>
               <BreadcrumbList>
                 <BreadcrumbItem className="hidden md:block">
-                  <BreadcrumbLink href="#">
-                    {localStorage.getItem("menu") || "Gision"}
+                  <BreadcrumbLink href="#" className="text-black">
+                    {currentMenu}
                   </BreadcrumbLink>
                 </BreadcrumbItem>
               </BreadcrumbList>
@@ -37,7 +83,7 @@ const Home = () => {
         <div className="flex flex-col p-4 pt-0">
           <div className="h-screen flex flex-col">
             <div className="flex-1 relative z-0 overflow-hidden rounded-xl">
-              <Map />
+              {renderContent()}
             </div>
             <Toaster />
           </div>

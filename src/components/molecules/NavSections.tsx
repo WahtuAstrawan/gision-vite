@@ -1,7 +1,4 @@
-"use client";
-
 import { type LucideIcon } from "lucide-react";
-
 import {
   SidebarGroup,
   SidebarGroupLabel,
@@ -9,24 +6,39 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
+import { useMenuStore, type MenuType } from "@/stores/menuStore";
 
-export default function NavProjects({
-  projects,
+export default function NavSections({
+  sections,
 }: {
-  projects: {
+  sections: {
     name: string;
     url: string;
     icon: LucideIcon;
   }[];
 }) {
+  const { setCurrentMenu, currentMenu } = useMenuStore();
+
+  const handleSectionChanges = (name: string) => {
+    setCurrentMenu(name as MenuType);
+  };
+
   return (
     <SidebarGroup className="group-data-[collapsible=icon]:hidden">
       <SidebarGroupLabel>Main Menu</SidebarGroupLabel>
       <SidebarMenu>
-        {projects.map((item) => (
-          <SidebarMenuItem key={item.name}>
+        {sections.map((item) => (
+          <SidebarMenuItem
+            key={item.name}
+            className={
+              currentMenu === item.name ? "bg-muted font-semibold" : ""
+            }
+          >
             <SidebarMenuButton asChild>
-              <a href={item.url}>
+              <a
+                href={item.url}
+                onClick={() => handleSectionChanges(item.name)}
+              >
                 <item.icon />
                 <span>{item.name}</span>
               </a>

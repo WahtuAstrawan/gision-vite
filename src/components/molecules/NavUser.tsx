@@ -13,20 +13,20 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 import LogoutButton from "../atoms/LogoutButton";
+import { useAuthStore } from "@/stores/authStore";
 
-export default function NavUser({
-  user,
-}: {
-  user: {
-    id: number;
-    name: string;
-    email: string;
-    email_verified_at: string | null;
-    created_at: string;
-    updated_at: string;
-  };
-}) {
+export default function NavUser() {
   const { isMobile } = useSidebar();
+  const { name, email } = useAuthStore();
+
+  const initials = name
+    ? name
+        .split(" ")
+        .map((part) => part[0])
+        .join("")
+        .slice(0, 2)
+        .toUpperCase()
+    : "UN";
 
   return (
     <SidebarMenu>
@@ -40,13 +40,17 @@ export default function NavUser({
               <Avatar className="h-8 w-8 rounded-lg">
                 <AvatarImage
                   src="https://github.com/shadcn.png"
-                  alt={user.name}
+                  alt={name || "User"}
                 />
-                <AvatarFallback className="rounded-lg">UN</AvatarFallback>
+                <AvatarFallback className="rounded-lg">
+                  {initials}
+                </AvatarFallback>
               </Avatar>
               <div className="grid flex-1 text-left text-sm leading-tight">
-                <span className="truncate font-semibold">{user.name}</span>
-                <span className="truncate text-xs">{user.email}</span>
+                <span className="truncate font-semibold">{name || "User"}</span>
+                <span className="truncate text-xs">
+                  {email || "user@example.com"}
+                </span>
               </div>
               <ChevronsUpDown className="ml-auto size-4" />
             </SidebarMenuButton>

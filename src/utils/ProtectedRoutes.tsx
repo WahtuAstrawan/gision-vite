@@ -1,9 +1,10 @@
 import { Outlet, Navigate } from "react-router-dom";
+import { useAuthStore } from "@/stores/authStore";
 
 const ProtectedRoutes = () => {
-  const valid =
-    localStorage.getItem("token") &&
-    localStorage.getItem("token") !== "invalid";
+  const { token } = useAuthStore();
+  const valid = token && token !== "invalid";
+
   return valid ? <Outlet /> : <Navigate to="/" />;
 };
 
