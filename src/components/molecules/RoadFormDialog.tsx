@@ -33,6 +33,7 @@ import { MapDraw } from "../atoms/MapDraw";
 import { useAuthStore } from "@/stores/authStore";
 import polyline from "@mapbox/polyline";
 import { Polyline } from "react-leaflet";
+import { getPolylineLength } from "@/lib/utils";
 
 interface RoadFormDialogProps {
   open: boolean;
@@ -190,7 +191,20 @@ const RoadFormDialog: React.FC<RoadFormDialogProps> = ({
             >
               <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
               <MapDraw
-                setPath={(encodedPath) => setValue("paths", encodedPath)}
+                setPath={(encodedPath) => {
+                  setValue("paths", encodedPath);
+
+                  const decoded = polyline.decode(encodedPath) as [
+                    number,
+                    number
+                  ][];
+                  setDecodedPath(decoded);
+
+                  if (decoded.length > 0) {
+                    const length = getPolylineLength(decoded);
+                    setValue("panjang", parseFloat(length.toFixed(0)));
+                  }
+                }}
               />
               {decodedPath.length > 0 && (
                 <Polyline positions={decodedPath} color="blue" />
@@ -226,6 +240,7 @@ const RoadFormDialog: React.FC<RoadFormDialogProps> = ({
               <Input
                 type="number"
                 id="panjang"
+                disabled
                 {...register("panjang", { valueAsNumber: true })}
               />
               {errors.panjang && (

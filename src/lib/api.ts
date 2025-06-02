@@ -244,12 +244,16 @@ export const deleteRoadById = async (roadId: number, token: string) => {
     });
 
     if (!response.ok) {
-      throw new Error("Add road failed");
+      throw new Error("Delete road failed");
     }
 
     return await response.json();
   } catch (error) {
-    console.error("Add road error:", error);
+    console.error("Delete road error:", error);
     throw error;
   }
 };
+
+// Filter tabular dan separsial
+// Legend
+// Binding data tabular dan separsial
