@@ -1,26 +1,25 @@
-import Map from "@/components/molecules/Map";
+import Map from '@/components/molecules/Map';
+import AppSidebar from '@/components/organisms/AppSidebar';
+import RoadSection from '@/components/organisms/RoadSection';
 import {
   Breadcrumb,
   BreadcrumbItem,
   BreadcrumbLink,
   BreadcrumbList,
-} from "@/components/ui/breadcrumb";
-import { Separator } from "@/components/ui/separator";
-import AppSidebar from "@/components/organisms/AppSidebar";
+} from '@/components/ui/breadcrumb';
+import { Separator } from '@/components/ui/separator';
 import {
   SidebarInset,
   SidebarProvider,
   SidebarTrigger,
-} from "@/components/ui/sidebar";
-import { Toaster } from "@/components/ui/sonner";
-import { useMenuStore } from "@/stores/menuStore";
-import RoadSection from "@/components/organisms/RoadSection";
-import { useEffect, useState } from "react";
-import { getAllRoads } from "@/lib/api";
-import { type AllRoadsResponse, type Road } from "@/lib/types";
-import { useAuthStore } from "@/stores/authStore";
-import { toast } from "sonner";
-import { useNavigate } from "react-router-dom";
+} from '@/components/ui/sidebar';
+import { Toaster } from '@/components/ui/sonner';
+import { getAllRoads } from '@/lib/api';
+import { useAuthStore } from '@/stores/authStore';
+import { useMenuStore } from '@/stores/menuStore';
+import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { toast } from 'sonner';
 
 const Home = () => {
   const { currentMenu } = useMenuStore();
@@ -32,29 +31,29 @@ const Home = () => {
   useEffect(() => {
     const fetchRoads = async () => {
       try {
-        const res: AllRoadsResponse = await getAllRoads(token || "");
+        const res: AllRoadsResponse = await getAllRoads(token || '');
         if (res.code === 200) {
           setRoads(res.ruasjalan);
         } else if (res.code >= 400 && res.code < 500) {
-          toast.warning("Login session expired.");
-          setTimeout(() => navigate("/"), 2000);
-        } else toast.error("Internal server error.");
+          toast.warning('Login session expired.');
+          setTimeout(() => navigate('/'), 2000);
+        } else toast.error('Internal server error.');
       } catch (err) {
-        console.error("Failed to fetch roads:", err);
-        toast.error("Failed to fetch roads");
+        console.error('Failed to fetch roads:', err);
+        toast.error('Failed to fetch roads');
       }
     };
 
-    if (currentMenu === "Maps") {
+    if (currentMenu === 'Maps') {
       fetchRoads();
     }
   }, [currentMenu]);
 
   const renderContent = () => {
     switch (currentMenu) {
-      case "Maps":
+      case 'Maps':
         return <Map roads={roads} />;
-      case "Roads":
+      case 'Roads':
         return <RoadSection />;
       default:
         return <Map roads={roads} />;

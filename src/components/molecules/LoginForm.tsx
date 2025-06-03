@@ -1,20 +1,17 @@
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { loginSchema } from "@/lib/validators";
-import type { LoginRequest } from "@/lib/types";
-import { loginUser } from "@/lib/api";
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { Loader2 } from "lucide-react";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import type { UserResponse } from "@/lib/types";
-import { getUser } from "@/lib/api";
-import { toast } from "sonner";
-import { useAuthStore } from "@/stores/authStore";
-import { useMenuStore } from "@/stores/menuStore";
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { getUser, loginUser } from '@/lib/api';
+import { loginSchema } from '@/lib/validators';
+import { useAuthStore } from '@/stores/authStore';
+import { useMenuStore } from '@/stores/menuStore';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { Loader2 } from 'lucide-react';
+import { useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { useNavigate } from 'react-router-dom';
+import { toast } from 'sonner';
 
 const LoginForm = () => {
   const [error, setError] = useState<string | null>(null);
@@ -27,14 +24,14 @@ const LoginForm = () => {
       if (response.meta.code === 200) {
         return response;
       } else if (response.meta.code >= 400 && response.meta.code < 500) {
-        console.error("Forbidden to get user info.");
+        console.error('Forbidden to get user info.');
         toast.error(`Cannot get user info: ${response.meta.message}`);
         clearAuth();
-        setTimeout(() => navigate("/"), 2000);
+        setTimeout(() => navigate('/'), 2000);
       }
     } catch (err) {
-      console.error("An error occurred while fetching data:", err);
-      toast.error("Something went wrong when getting user info");
+      console.error('An error occurred while fetching data:', err);
+      toast.error('Something went wrong when getting user info');
     }
   };
 
@@ -45,8 +42,8 @@ const LoginForm = () => {
   } = useForm<LoginRequest>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
-      email: "",
-      password: "",
+      email: '',
+      password: '',
     },
   });
 
@@ -54,7 +51,7 @@ const LoginForm = () => {
     setError(null);
     try {
       const response = await loginUser(data);
-      if (response.meta.status === "failed") {
+      if (response.meta.status === 'failed') {
         setError(response.meta.message);
         return;
       }
@@ -63,14 +60,14 @@ const LoginForm = () => {
 
       setAuth(
         token,
-        user?.data.user.name || "User",
-        user?.data.user.email || "you@example.com"
+        user?.data.user.name || 'User',
+        user?.data.user.email || 'you@example.com'
       );
-      useMenuStore.getState().setCurrentMenu("Maps");
-      navigate("/home");
+      useMenuStore.getState().setCurrentMenu('Maps');
+      navigate('/home');
     } catch (err) {
       console.warn(err);
-      setError("Login failed. Please check your email and password.");
+      setError('Login failed. Please check your email and password.');
     }
   };
 
@@ -85,8 +82,8 @@ const LoginForm = () => {
           type="email"
           placeholder="you@example.com"
           className="h-12 border-gray-300 focus:ring-2 focus:ring-blue-500 transition-all duration-300 rounded-lg"
-          {...register("email")}
-          aria-invalid={errors.email ? "true" : "false"}
+          {...register('email')}
+          aria-invalid={errors.email ? 'true' : 'false'}
         />
         {errors.email && (
           <p className="text-sm text-red-500" role="alert">
@@ -103,8 +100,8 @@ const LoginForm = () => {
           type="password"
           placeholder="Password"
           className="h-12 border-gray-300 focus:ring-2 focus:ring-blue-500 transition-all duration-300 rounded-lg"
-          {...register("password")}
-          aria-invalid={errors.password ? "true" : "false"}
+          {...register('password')}
+          aria-invalid={errors.password ? 'true' : 'false'}
         />
         {errors.password && (
           <p className="text-sm text-red-500" role="alert">
@@ -130,7 +127,7 @@ const LoginForm = () => {
             Loading...
           </span>
         ) : (
-          "Sign In"
+          'Sign In'
         )}
       </Button>
     </form>

@@ -1,15 +1,14 @@
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { registerSchema } from "@/lib/validators";
-import type { RegisterRequest } from "@/lib/types";
-import { registerUser } from "@/lib/api";
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { Loader2 } from "lucide-react";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
-import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { registerUser } from '@/lib/api';
+import { registerSchema } from '@/lib/validators';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { Loader2 } from 'lucide-react';
+import { useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { useNavigate } from 'react-router-dom';
 
 const RegisterForm = () => {
   const [error, setError] = useState<string | null>(null);
@@ -21,9 +20,9 @@ const RegisterForm = () => {
   } = useForm<RegisterRequest>({
     resolver: zodResolver(registerSchema),
     defaultValues: {
-      name: "",
-      email: "",
-      password: "",
+      name: '',
+      email: '',
+      password: '',
     },
   });
 
@@ -31,13 +30,13 @@ const RegisterForm = () => {
     setError(null);
     try {
       const response = await registerUser(data);
-      if (response.meta.status === "failed") {
+      if (response.meta.status === 'failed') {
         setError(response.meta.message);
         return;
       }
-      navigate("/");
+      navigate('/');
     } catch (err) {
-      setError("Registration failed. Please try again.");
+      setError('Registration failed. Please try again.');
     }
   };
 
@@ -51,8 +50,8 @@ const RegisterForm = () => {
           id="name"
           placeholder="John Doe"
           className="h-12 border-gray-300 focus:ring-2 focus:ring-blue-500 transition-all duration-300 rounded-lg"
-          {...register("name")}
-          aria-invalid={errors.name ? "true" : "false"}
+          {...register('name')}
+          aria-invalid={errors.name ? 'true' : 'false'}
         />
         {errors.name && (
           <p className="text-sm text-red-500" role="alert">
@@ -70,8 +69,8 @@ const RegisterForm = () => {
           type="email"
           placeholder="you@example.com"
           className="h-12 border-gray-300 focus:ring-2 focus:ring-blue-500 transition-all duration-300 rounded-lg"
-          {...register("email")}
-          aria-invalid={errors.email ? "true" : "false"}
+          {...register('email')}
+          aria-invalid={errors.email ? 'true' : 'false'}
         />
         {errors.email && (
           <p className="text-sm text-red-500" role="alert">
@@ -89,8 +88,8 @@ const RegisterForm = () => {
           type="password"
           placeholder="Password"
           className="h-12 border-gray-300 focus:ring-2 focus:ring-blue-500 transition-all duration-300 rounded-lg"
-          {...register("password")}
-          aria-invalid={errors.password ? "true" : "false"}
+          {...register('password')}
+          aria-invalid={errors.password ? 'true' : 'false'}
         />
         {errors.password && (
           <p className="text-sm text-red-500" role="alert">
@@ -116,7 +115,7 @@ const RegisterForm = () => {
             Creating account...
           </span>
         ) : (
-          "Sign Up"
+          'Sign Up'
         )}
       </Button>
     </form>

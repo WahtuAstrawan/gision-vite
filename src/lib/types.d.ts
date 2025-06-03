@@ -1,15 +1,15 @@
-export type LoginRequest = {
+type LoginRequest = {
   email: string;
   password: string;
 };
 
-export type RegisterRequest = {
+type RegisterRequest = {
   name: string;
   email: string;
   password: string;
 };
 
-export type AddRoadRequest = {
+type AddRoadRequest = {
   paths: string;
   desa_id: number;
   kode_ruas: string;
@@ -22,7 +22,7 @@ export type AddRoadRequest = {
   keterangan: string;
 };
 
-export type RegionResponse = {
+type RegionResponse = {
   code: number;
   status: string;
   provinsi: { id: number; provinsi: string }[];
@@ -31,7 +31,7 @@ export type RegionResponse = {
   desa: { id: number; kec_id: number; desa: string }[];
 };
 
-export type User = {
+type User = {
   id: number;
   name: string;
   email: string;
@@ -40,19 +40,19 @@ export type User = {
   updated_at: string;
 };
 
-export type Meta = {
+type Meta = {
   code: number;
   message: string;
 };
 
-export type UserResponse = {
+type UserResponse = {
   meta: Meta;
   data: {
     user: User;
   };
 };
 
-export type Road = {
+type Road = {
   id: number;
   paths: string;
   desa_id: number;
@@ -66,46 +66,46 @@ export type Road = {
   keterangan: string;
 };
 
-export type AllRoadsResponse = {
+type AllRoadsResponse = {
   code: number;
   user: User;
-  "token-expired": number;
+  'token-expired': number;
   status: string;
   ruasjalan: Road[];
 };
 
-export type RoadMaterial = {
+type RoadMaterial = {
   id: number;
   eksisting: string;
 };
 
-export type RoadMaterialResponse = {
+type RoadMaterialResponse = {
   code: number;
-  "token-expired": number;
+  'token-expired': number;
   status: string;
   eksisting: RoadMaterial[];
 };
 
-export type RoadTypeItem = {
+type RoadTypeItem = {
   id: number;
   jenisjalan: string;
 };
 
-export type RoadType = {
+type RoadType = {
   code: number;
-  "token-expired": number;
+  'token-expired': number;
   status: string;
   eksisting: RoadTypeItem[];
 };
 
-export type RoadConditionItem = {
+type RoadConditionItem = {
   id: number;
   kondisi: string;
 };
 
-export type RoadCondition = {
+type RoadCondition = {
   code: number;
-  "token-expired": number;
+  'token-expired': number;
   status: string;
   eksisting: RoadConditionItem[];
 };

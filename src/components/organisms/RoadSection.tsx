@@ -1,39 +1,31 @@
-import * as React from "react";
+import ViewMapDialog from '@/components/molecules/ViewMapDialog';
+import { Button } from '@/components/ui/button';
 import {
   Table,
   TableBody,
   TableCell,
-  TableHeader,
   TableHead,
+  TableHeader,
   TableRow,
-} from "@/components/ui/table";
-import { Button } from "@/components/ui/button";
+} from '@/components/ui/table';
 import {
+  deleteRoadById,
   getAllRegion,
   getAllRoads,
   getRoadCondition,
   getRoadMaterial,
   getRoadType,
-} from "@/lib/api";
-import { useAuthStore } from "@/stores/authStore";
-import type {
-  AllRoadsResponse,
-  RoadMaterial,
-  Road,
-  RoadTypeItem,
-  RoadConditionItem,
-  RegionResponse,
-  RoadMaterialResponse,
-  RoadType,
-  RoadCondition,
-} from "@/lib/types";
-import { Loader2, Plus, Pencil, Trash } from "lucide-react";
-import ViewMapDialog from "@/components/molecules/ViewMapDialog";
-import { useNavigate } from "react-router-dom";
-import RoadFormDialog from "../molecules/RoadFormDialog";
-import { deleteRoadById } from "@/lib/api";
-import { toast } from "sonner";
-import ConfirmDialog from "../atoms/ConfirmDialog";
+} from '@/lib/api';
+import { useAuthStore } from '@/stores/authStore';
+import '@geoman-io/leaflet-geoman-free';
+import '@geoman-io/leaflet-geoman-free/dist/leaflet-geoman.css';
+import 'leaflet/dist/leaflet.css';
+import { Loader2, Pencil, Plus, Trash } from 'lucide-react';
+import * as React from 'react';
+import { useNavigate } from 'react-router-dom';
+import { toast } from 'sonner';
+import ConfirmDialog from '../atoms/ConfirmDialog';
+import RoadFormDialog from '../molecules/RoadFormDialog';
 
 const RoadSection = () => {
   const { token } = useAuthStore();
@@ -57,15 +49,15 @@ const RoadSection = () => {
 
   const handleApi = async (apiFunc: any, onSuccess: Function) => {
     try {
-      const res = await apiFunc(token || "");
+      const res = await apiFunc(token || '');
       if (res.code === 200) return onSuccess(res);
       if (res.code >= 400 && res.code < 500) {
-        setError("Login session expired.");
-        setTimeout(() => navigate("/"), 2000);
-      } else setError("Internal server error.");
+        setError('Login session expired.');
+        setTimeout(() => navigate('/'), 2000);
+      } else setError('Internal server error.');
     } catch (e) {
-      console.error("API Error:", e);
-      setError("An error occurred while loading the data.");
+      console.error('API Error:', e);
+      setError('An error occurred while loading the data.');
     }
   };
 
@@ -79,16 +71,16 @@ const RoadSection = () => {
     if (!roadToDelete) return;
 
     try {
-      const res = await deleteRoadById(roadToDelete.id, token || "");
+      const res = await deleteRoadById(roadToDelete.id, token || '');
       if (res.code === 200) {
-        toast.success("Road deleted successfully!");
+        toast.success('Road deleted successfully!');
         refreshRoadList();
       } else {
-        toast.error("Failed to delete road.");
+        toast.error('Failed to delete road.');
       }
     } catch (err) {
       console.error(err);
-      toast.error("An error occurred during deletion.");
+      toast.error('An error occurred during deletion.');
     } finally {
       setRoadToDelete(null);
     }
@@ -118,15 +110,15 @@ const RoadSection = () => {
   }, []);
 
   const findName = (list: any[], id: number, key: string) =>
-    list.find((item) => item.id === id)?.[key] || "-";
+    list.find((item) => item.id === id)?.[key] || '-';
 
   const getMaterialName = (id: number) =>
-    findName(roadMaterial, id, "eksisting");
+    findName(roadMaterial, id, 'eksisting');
   const getConditionName = (id: number) =>
-    findName(roadCondition, id, "kondisi");
-  const getTypeName = (id: number) => findName(roadType, id, "jenisjalan");
+    findName(roadCondition, id, 'kondisi');
+  const getTypeName = (id: number) => findName(roadType, id, 'jenisjalan');
   const getVillageName = (id: number) =>
-    allRegion?.desa.find((d) => d.id === id)?.desa || "-";
+    allRegion?.desa.find((d) => d.id === id)?.desa || '-';
 
   if (loading)
     return (
@@ -230,6 +222,7 @@ const RoadSection = () => {
           onOpenChange={() => setSelectedRoadForMap(null)}
           paths={selectedRoadForMap.paths}
           roadName={selectedRoadForMap.nama_ruas}
+          roadType={selectedRoadForMap.jenisjalan_id}
         />
       )}
       {allRegion && (
@@ -242,8 +235,8 @@ const RoadSection = () => {
           onSuccess={() => {
             toast.success(
               selectedRoadForEdit
-                ? "Road updated successfully!"
-                : "Road added successfully!"
+                ? 'Road updated successfully!'
+                : 'Road added successfully!'
             );
             refreshRoadList();
           }}
