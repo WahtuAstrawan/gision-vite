@@ -1,62 +1,32 @@
-import Map from '@/components/molecules/Map';
-import AppSidebar from '@/components/organisms/AppSidebar';
-import RoadSection from '@/components/organisms/RoadSection';
+import Map from "@/components/molecules/Map";
+import AppSidebar from "@/components/organisms/AppSidebar";
+import RoadSection from "@/components/organisms/RoadSection";
 import {
   Breadcrumb,
   BreadcrumbItem,
   BreadcrumbLink,
   BreadcrumbList,
-} from '@/components/ui/breadcrumb';
-import { Separator } from '@/components/ui/separator';
+} from "@/components/ui/breadcrumb";
+import { Separator } from "@/components/ui/separator";
 import {
   SidebarInset,
   SidebarProvider,
   SidebarTrigger,
-} from '@/components/ui/sidebar';
-import { Toaster } from '@/components/ui/sonner';
-import { getAllRoads } from '@/lib/api';
-import { useAuthStore } from '@/stores/authStore';
-import { useMenuStore } from '@/stores/menuStore';
-import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { toast } from 'sonner';
+} from "@/components/ui/sidebar";
+import { Toaster } from "@/components/ui/sonner";
+import { useMenuStore } from "@/stores/menuStore";
 
 const Home = () => {
   const { currentMenu } = useMenuStore();
-  const { token } = useAuthStore();
-  const navigate = useNavigate();
-
-  const [roads, setRoads] = useState<Road[]>([]);
-
-  useEffect(() => {
-    const fetchRoads = async () => {
-      try {
-        const res: AllRoadsResponse = await getAllRoads(token || '');
-        if (res.code === 200) {
-          setRoads(res.ruasjalan);
-        } else if (res.code >= 400 && res.code < 500) {
-          toast.warning('Login session expired.');
-          setTimeout(() => navigate('/'), 2000);
-        } else toast.error('Internal server error.');
-      } catch (err) {
-        console.error('Failed to fetch roads:', err);
-        toast.error('Failed to fetch roads');
-      }
-    };
-
-    if (currentMenu === 'Maps') {
-      fetchRoads();
-    }
-  }, [currentMenu]);
 
   const renderContent = () => {
     switch (currentMenu) {
-      case 'Maps':
-        return <Map roads={roads} />;
-      case 'Roads':
+      case "Maps":
+        return <Map />;
+      case "Roads":
         return <RoadSection />;
       default:
-        return <Map roads={roads} />;
+        return <Map />;
     }
   };
 
