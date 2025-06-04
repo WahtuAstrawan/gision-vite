@@ -58,6 +58,8 @@ const RoadFormDialog: React.FC<RoadFormDialogProps> = ({
   const [mapCenter, setMapCenter] = useState<[number, number]>([-8.65, 115.22]);
   const [decodedPath, setDecodedPath] = useState<[number, number][]>([]);
   const [roadColor, setRoadColor] = useState<string>('black');
+  const [selectedKabupaten, setSelectedKabupaten] = useState('');
+  const [selectedKecamatan, setSelectedKecamatan] = useState('');
 
   const isEditMode = !!initialData;
 
@@ -182,6 +184,18 @@ const RoadFormDialog: React.FC<RoadFormDialogProps> = ({
     }
   }, [initialData]);
 
+  const filteredKecamatan = allRegion.kecamatan.filter(
+    (k) =>
+      allRegion.kabupaten.find((kab) => kab.id === k.kab_id)?.kabupaten ===
+      selectedKabupaten
+  );
+
+  const filteredDesa = allRegion.desa.filter(
+    (d) =>
+      allRegion.kecamatan.find((kec) => kec.id === d.kec_id)?.kecamatan ===
+      selectedKecamatan
+  );
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-5xl h-[95vh] overflow-y-scroll">
@@ -267,8 +281,57 @@ const RoadFormDialog: React.FC<RoadFormDialogProps> = ({
                 <p className="text-sm text-red-500">{errors.lebar.message}</p>
               )}
             </div>
+            {/* KABUPATEN */}
             <div className="space-y-2">
-              <Label htmlFor="desa_id">Village</Label>
+              <Label htmlFor="kabupaten">Kabupaten</Label>
+              <Select
+                onValueChange={(value) => {
+                  setSelectedKabupaten(value);
+                  setSelectedKecamatan('');
+                  setSelectedDesa('');
+                  setValue('desa_id', 0); // Reset
+                }}
+              >
+                <SelectTrigger id="kabupaten">
+                  {selectedKabupaten || 'Select Kabupaten'}
+                </SelectTrigger>
+                <SelectContent>
+                  {allRegion.kabupaten.map((kab) => (
+                    <SelectItem key={kab.id} value={kab.kabupaten}>
+                      {kab.kabupaten}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* KECAMATAN */}
+            <div className="space-y-2">
+              <Label htmlFor="kecamatan">Kecamatan</Label>
+              <Select
+                onValueChange={(value) => {
+                  setSelectedKecamatan(value);
+                  setSelectedDesa('');
+                  setValue('desa_id', 0);
+                }}
+                disabled={!selectedKabupaten}
+              >
+                <SelectTrigger id="kecamatan">
+                  {selectedKecamatan || 'Select Kecamatan'}
+                </SelectTrigger>
+                <SelectContent>
+                  {filteredKecamatan.map((kec) => (
+                    <SelectItem key={kec.id} value={kec.kecamatan}>
+                      {kec.kecamatan}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* DESA */}
+            <div className="space-y-2">
+              <Label htmlFor="desa_id">Desa</Label>
               <Select
                 onValueChange={(value) => {
                   const selected = allRegion.desa.find(
@@ -277,12 +340,13 @@ const RoadFormDialog: React.FC<RoadFormDialogProps> = ({
                   setSelectedDesa(selected?.desa || '');
                   setValue('desa_id', parseInt(value));
                 }}
+                disabled={!selectedKecamatan}
               >
                 <SelectTrigger id="desa_id">
-                  {selectedDesa || 'Select Village'}
+                  {selectedDesa || 'Select Desa'}
                 </SelectTrigger>
                 <SelectContent>
-                  {allRegion.desa.map((desa) => (
+                  {filteredDesa.map((desa) => (
                     <SelectItem key={desa.id} value={desa.id.toString()}>
                       {desa.desa}
                     </SelectItem>
