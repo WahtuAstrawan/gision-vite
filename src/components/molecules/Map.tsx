@@ -1,15 +1,10 @@
-import { decodePath } from "@/lib/utils";
-import "@geoman-io/leaflet-geoman-free";
-import "@geoman-io/leaflet-geoman-free/dist/leaflet-geoman.css";
-import "leaflet/dist/leaflet.css";
-import { useEffect, useRef, useState } from "react";
 import {
-  MapContainer,
-  Polyline,
-  TileLayer,
-  Tooltip,
-  useMap,
-} from "react-leaflet";
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import {
   Table,
   TableBody,
@@ -17,26 +12,36 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
+} from '@/components/ui/table';
 import {
+  deleteRoadById,
   getAllRegion,
   getAllRoads,
   getRoadCondition,
   getRoadMaterial,
   getRoadType,
-} from "@/lib/api";
-import { Loader2, X, Search } from "lucide-react";
-import { useNavigate } from "react-router-dom";
-import { useAuthStore } from "@/stores/authStore";
-import L, { Map as LeafletMap } from "leaflet";
+} from '@/lib/api';
+import { decodePath } from '@/lib/utils';
+import { useAuthStore } from '@/stores/authStore';
+import '@geoman-io/leaflet-geoman-free';
+import '@geoman-io/leaflet-geoman-free/dist/leaflet-geoman.css';
+import L, { Map as LeafletMap } from 'leaflet';
+import 'leaflet/dist/leaflet.css';
+import { Loader2, Pencil, Search, Trash, X } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Button } from "../ui/button";
+  MapContainer,
+  Polyline,
+  TileLayer,
+  Tooltip,
+  useMap,
+} from 'react-leaflet';
+import { useNavigate } from 'react-router-dom';
+import { toast } from 'sonner';
+import ConfirmDialog from '../atoms/ConfirmDialog';
+import { Alert, AlertDescription } from '../ui/alert';
+import { Button } from '../ui/button';
+import RoadFormDialog from './RoadFormDialog';
 
 function GeomanControl() {
   const map = useMap();
@@ -58,23 +63,79 @@ export default function MapPage() {
   const [roadCondition, setRoadCondition] = useState<RoadConditionItem[]>([]);
   const [allRegion, setAllRegion] = useState<RegionResponse>();
   const [error, setError] = useState<string | null>(null);
-  const [selectedMaterial, setSelectedMaterial] = useState<string>("all");
-  const [selectedCondition, setSelectedCondition] = useState<string>("all");
-  const [selectedType, setSelectedType] = useState<string>("all");
-  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedMaterial, setSelectedMaterial] = useState<string>('all');
+  const [selectedCondition, setSelectedCondition] = useState<string>('all');
+  const [selectedType, setSelectedType] = useState<string>('all');
+  const [searchQuery, setSearchQuery] = useState('');
   const [searchResult, setSearchResult] = useState<Road[] | null>(null);
+  const [selectedRoadForEdit, setSelectedRoadForEdit] = useState<Road | null>(
+    null
+  );
+  const [roadToDelete, setRoadToDelete] = useState<Road | null>(null);
+  const [openDialog, setOpenDialog] = useState(false);
+
+  const handleDelete = async () => {
+    if (!roadToDelete) return;
+
+    try {
+      const res = await deleteRoadById(roadToDelete.id, token || '');
+      if (res.code === 200) {
+        toast.success('Road deleted successfully!');
+        fetchAllRoads();
+      } else {
+        toast.error('Failed to delete road.');
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error('An error occurred during deletion.');
+    } finally {
+      setRoadToDelete(null);
+    }
+  };
+
+  const fetchAllRoads = async () => {
+    try {
+      const res = await getAllRoads(token || '');
+      if (res.code === 200) {
+        setRoads(res.ruasjalan || []);
+      }
+    } catch (e) {
+      console.error(e);
+      setError('Failed to load road data.');
+    }
+  };
+
+  useEffect(() => {
+    setLoading(true);
+    Promise.all([
+      getAllRoads(token || '').then((res) => setRoads(res.ruasjalan || [])),
+      getRoadMaterial(token || '').then((res) =>
+        setRoadMaterial(res.eksisting || [])
+      ),
+      getRoadType(token || '').then((res) => setRoadType(res.eksisting || [])),
+      getRoadCondition(token || '').then((res) =>
+        setRoadCondition(res.eksisting || [])
+      ),
+      getAllRegion(token || '').then(setAllRegion),
+    ])
+      .catch((e) => {
+        console.error(e);
+        setError('Failed to load data.');
+      })
+      .finally(() => setLoading(false));
+  }, []);
 
   const handleApi = async (apiFunc: any, onSuccess: Function) => {
     try {
-      const res = await apiFunc(token || "");
+      const res = await apiFunc(token || '');
       if (res.code === 200) return onSuccess(res);
       if (res.code >= 400 && res.code < 500) {
-        setError("Login session expired.");
-        setTimeout(() => navigate("/"), 2000);
-      } else setError("Internal server error.");
+        setError('Login session expired.');
+        setTimeout(() => navigate('/'), 2000);
+      } else setError('Internal server error.');
     } catch (e) {
-      console.error("API Error:", e);
-      setError("An error occurred while loading the data.");
+      console.error('API Error:', e);
+      setError('An error occurred while loading the data.');
     }
   };
 
@@ -112,28 +173,28 @@ export default function MapPage() {
   ]);
 
   const findName = (list: any[], id: number, key: string) =>
-    list.find((item) => item.id === id)?.[key] || "-";
+    list.find((item) => item.id === id)?.[key] || '-';
 
   const getMaterialName = (id: number) =>
-    findName(roadMaterial, id, "eksisting");
+    findName(roadMaterial, id, 'eksisting');
   const getConditionName = (id: number) =>
-    findName(roadCondition, id, "kondisi");
-  const getTypeName = (id: number) => findName(roadType, id, "jenisjalan");
+    findName(roadCondition, id, 'kondisi');
+  const getTypeName = (id: number) => findName(roadType, id, 'jenisjalan');
   const getVillageName = (id: number) =>
-    allRegion?.desa.find((d) => d.id === id)?.desa || "-";
+    allRegion?.desa.find((d) => d.id === id)?.desa || '-';
   const filteredRoads = roads.filter((road) => {
     const matchMaterial =
-      selectedMaterial !== "all"
+      selectedMaterial !== 'all'
         ? road.eksisting_id === parseInt(selectedMaterial)
         : true;
 
     const matchCondition =
-      selectedCondition !== "all"
+      selectedCondition !== 'all'
         ? road.kondisi_id === parseInt(selectedCondition)
         : true;
 
     const matchType =
-      selectedType !== "all"
+      selectedType !== 'all'
         ? road.jenisjalan_id === parseInt(selectedType)
         : true;
 
@@ -152,7 +213,7 @@ export default function MapPage() {
     else setSelectedRoadId(road.id);
 
     const bounds = L.latLngBounds(decodedPath);
-    map.fitBounds(bounds);
+    map.flyToBounds(bounds);
   };
 
   const handleSearchClick = () => {
@@ -173,21 +234,31 @@ export default function MapPage() {
   const getRoadColor = (road: Road) => {
     switch (road.jenisjalan_id) {
       case 3:
-        return "blue";
+        return 'blue';
       case 2:
-        return "red";
+        return 'red';
       default:
-        return "green";
+        return 'green';
     }
   };
 
-  if (error)
-    return <div className="text-red-500 flex m-5 justify-center">{error}</div>;
+  const getDashArray = (kondisiId: number): string | undefined => {
+    switch (kondisiId) {
+      case 1:
+        return '';
+      case 2:
+        return '6 4';
+      case 3:
+        return '2 6';
+      default:
+        return undefined;
+    }
+  };
 
   return (
     <div className="flex h-screen w-full overflow-hidden">
       {/* Table Side */}
-      <div className="w-[40%] overflow-y-auto border-r p-4 bg-white">
+      <div className="w-[50%] overflow-y-auto border-r p-4 bg-white">
         {loading ? (
           <div className="flex justify-center items-center mt-10">
             <Loader2 className="animate-spin mr-2" /> Loading roads data...
@@ -211,7 +282,7 @@ export default function MapPage() {
               </Button>
               <Button
                 onClick={() => {
-                  setSearchQuery("");
+                  setSearchQuery('');
                   setSearchResult(null);
                 }}
                 variant="outline"
@@ -224,7 +295,7 @@ export default function MapPage() {
             <div className="flex gap-2 mb-4">
               <Select
                 onValueChange={setSelectedMaterial}
-                value={selectedMaterial === "all" ? "" : selectedMaterial}
+                value={selectedMaterial === 'all' ? '' : selectedMaterial}
               >
                 <SelectTrigger className="w-[150px]">
                   <SelectValue placeholder="Material" />
@@ -241,7 +312,7 @@ export default function MapPage() {
 
               <Select
                 onValueChange={setSelectedCondition}
-                value={selectedCondition === "all" ? "" : selectedCondition}
+                value={selectedCondition === 'all' ? '' : selectedCondition}
               >
                 <SelectTrigger className="w-[150px]">
                   <SelectValue placeholder="Condition" />
@@ -258,7 +329,7 @@ export default function MapPage() {
 
               <Select
                 onValueChange={setSelectedType}
-                value={selectedType === "all" ? "" : selectedType}
+                value={selectedType === 'all' ? '' : selectedType}
               >
                 <SelectTrigger className="w-[150px]">
                   <SelectValue placeholder="Type" />
@@ -276,9 +347,9 @@ export default function MapPage() {
               <Button
                 variant="outline"
                 onClick={() => {
-                  setSelectedMaterial("all");
-                  setSelectedCondition("all");
-                  setSelectedType("all");
+                  setSelectedMaterial('all');
+                  setSelectedCondition('all');
+                  setSelectedType('all');
                 }}
                 className="p-2 rounded-md"
               >
@@ -294,6 +365,7 @@ export default function MapPage() {
                   <TableHead>Material</TableHead>
                   <TableHead>Condition</TableHead>
                   <TableHead>Type</TableHead>
+                  <TableHead className="text-center">Action</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -302,7 +374,7 @@ export default function MapPage() {
                     key={road.id}
                     onClick={() => handleRowClick(road)}
                     className={`cursor-pointer ${
-                      selectedRoadId === road.id ? "bg-gray-200" : ""
+                      selectedRoadId === road.id ? 'bg-gray-200' : ''
                     }`}
                   >
                     <TableCell>{road.kode_ruas}</TableCell>
@@ -311,21 +383,76 @@ export default function MapPage() {
                     <TableCell>{getMaterialName(road.eksisting_id)}</TableCell>
                     <TableCell>{getConditionName(road.kondisi_id)}</TableCell>
                     <TableCell>{getTypeName(road.jenisjalan_id)}</TableCell>
+                    <TableCell className="text-center">
+                      <div className="flex justify-center space-x-1">
+                        <Button
+                          variant="default"
+                          size="sm"
+                          onClick={() => {
+                            setSelectedRoadForEdit(road);
+                            setOpenDialog(true);
+                          }}
+                          className="bg-amber-500 hover:bg-amber-400"
+                        >
+                          <Pencil className="w-4 h-4" />
+                        </Button>
+                        <Button
+                          variant="destructive"
+                          size="sm"
+                          className="hover:bg-red-400"
+                          onClick={() => setRoadToDelete(road)}
+                        >
+                          <Trash className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    </TableCell>
                   </TableRow>
                 ))}
               </TableBody>
             </Table>
+            {allRegion && (
+              <RoadFormDialog
+                open={openDialog}
+                onOpenChange={(open) => {
+                  setOpenDialog(open);
+                  if (!open) setSelectedRoadForEdit(null);
+                }}
+                onSuccess={() => {
+                  toast.success(
+                    selectedRoadForEdit
+                      ? 'Road updated successfully!'
+                      : 'Road added successfully!'
+                  );
+                  fetchAllRoads();
+                }}
+                allRegion={allRegion}
+                roadMaterial={roadMaterial}
+                roadType={roadType}
+                roadCondition={roadCondition}
+                initialData={selectedRoadForEdit ?? undefined}
+              />
+            )}
+
+            <ConfirmDialog
+              open={!!roadToDelete}
+              onOpenChange={(open) => {
+                if (!open) setRoadToDelete(null);
+              }}
+              title="Delete Road"
+              description={`Are you sure you want to delete the road "${roadToDelete?.nama_ruas}"? This action cannot be undone.`}
+              onConfirm={handleDelete}
+            />
           </>
         )}
       </div>
 
       {/* Map Side */}
-      <div className="w-[60%] relative">
+      <div className="w-[50%] relative">
         <MapContainer
           center={[-8.782802, 115.17815]}
           zoom={11}
           zoomControl={false}
-          style={{ height: "100%", width: "100%" }}
+          style={{ height: '100%', width: '100%' }}
           ref={(node) => {
             if (node) mapRef.current = node;
           }}
@@ -337,29 +464,38 @@ export default function MapPage() {
             if (decodedPath.length === 0) return null;
 
             const isSelected = road.id === selectedRoadId;
-            const roadColor = isSelected ? "yellow" : getRoadColor(road);
+            const roadColor = isSelected ? 'yellow' : getRoadColor(road);
 
             return (
               <Polyline
                 key={`${road.id}-${road.id === selectedRoadId}`}
                 positions={decodedPath}
                 color={roadColor}
-                weight={isSelected ? 6 : 4}
+                dashArray={getDashArray(road.kondisi_id)}
+                weight={road.jenisjalan_id * 3}
                 opacity={isSelected ? 1 : 0.8}
               >
                 <Tooltip direction="top" sticky>
                   <div>
                     <strong>{road.nama_ruas}</strong>
                     <br />
-                    Length: {road.panjang / 1000 || "-"} km
+                    Length: {road.panjang / 1000 || '-'} km
                     <br />
-                    Width: {road.lebar || "-"} m
+                    Width: {road.lebar || '-'} m
+                    <br />
+                    Desc: {road.keterangan || '-'}
                   </div>
                 </Tooltip>
               </Polyline>
             );
           })}
         </MapContainer>
+
+        {error && (
+          <Alert variant="destructive">
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
+        )}
 
         {/* Legend */}
         <div className="absolute top-4 right-4 bg-white p-3 rounded shadow z-[1000] text-sm">
