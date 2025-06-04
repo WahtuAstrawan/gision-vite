@@ -42,6 +42,16 @@ import ConfirmDialog from '../atoms/ConfirmDialog';
 import { Alert, AlertDescription } from '../ui/alert';
 import { Button } from '../ui/button';
 import RoadFormDialog from './RoadFormDialog';
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from '@/components/ui/pagination';
+
+// TODO: No Pagination Yet
 
 function GeomanControl() {
   const map = useMap();
@@ -73,6 +83,8 @@ export default function MapPage() {
   );
   const [roadToDelete, setRoadToDelete] = useState<Road | null>(null);
   const [openDialog, setOpenDialog] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 1;
 
   const handleDelete = async () => {
     if (!roadToDelete) return;
@@ -200,7 +212,6 @@ export default function MapPage() {
 
     return matchMaterial && matchCondition && matchType;
   });
-  const displayedRoads = searchResult ?? filteredRoads;
 
   const handleRowClick = (road: Road) => {
     const map = mapRef.current;
@@ -254,6 +265,17 @@ export default function MapPage() {
         return undefined;
     }
   };
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [filteredRoads, searchResult]);
+
+  const dataToPaginate = searchResult ?? filteredRoads;
+  const paginatedRoads = dataToPaginate.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+  const totalPages = Math.ceil(dataToPaginate.length / itemsPerPage);
 
   return (
     <div className="flex h-screen w-full overflow-hidden">
@@ -369,7 +391,7 @@ export default function MapPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {displayedRoads.map((road) => (
+                {paginatedRoads.map((road) => (
                   <TableRow
                     key={road.id}
                     onClick={() => handleRowClick(road)}
@@ -410,6 +432,54 @@ export default function MapPage() {
                 ))}
               </TableBody>
             </Table>
+            <Pagination className="mt-4 justify-center">
+              <PaginationContent>
+                <PaginationItem>
+                  <PaginationPrevious
+                    onClick={() =>
+                      setCurrentPage((prev) => Math.max(prev - 1, 1))
+                    }
+                    className={
+                      currentPage === 1
+                        ? 'pointer-events-none opacity-50'
+                        : 'cursor-pointer'
+                    }
+                  />
+                </PaginationItem>
+                {[...Array(totalPages)].map((_, index) => {
+                  const page = index + 1;
+                  return (
+                    <PaginationItem key={page}>
+                      <PaginationLink
+                        onClick={() => setCurrentPage(page)}
+                        isActive={currentPage === page}
+                        className={
+                          currentPage === page
+                            ? 'bg-primary text-primary-foreground cursor-pointer'
+                            : 'hover:bg-muted cursor-pointer'
+                        }
+                      >
+                        {page}
+                      </PaginationLink>
+                    </PaginationItem>
+                  );
+                })}
+                <PaginationItem>
+                  <PaginationNext
+                    onClick={() => {
+                      if (currentPage < totalPages) {
+                        setCurrentPage((prev) => prev + 1);
+                      }
+                    }}
+                    className={
+                      currentPage === totalPages
+                        ? 'pointer-events-none opacity-50'
+                        : 'cursor-pointer'
+                    }
+                  />
+                </PaginationItem>
+              </PaginationContent>
+            </Pagination>
             {allRegion && (
               <RoadFormDialog
                 open={openDialog}
@@ -459,7 +529,7 @@ export default function MapPage() {
         >
           <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
           <GeomanControl />
-          {displayedRoads.map((road) => {
+          {paginatedRoads.map((road) => {
             const decodedPath = decodePath(road.paths);
             if (decodedPath.length === 0) return null;
 

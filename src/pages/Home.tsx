@@ -1,29 +1,29 @@
-import Map from "@/components/molecules/Map";
-import AppSidebar from "@/components/organisms/AppSidebar";
-import RoadSection from "@/components/organisms/RoadSection";
+import AppSidebar from '@/components/organisms/AppSidebar';
+import Map from '@/components/organisms/Map';
+import RoadSection from '@/components/organisms/RoadSection';
 import {
   Breadcrumb,
   BreadcrumbItem,
   BreadcrumbLink,
   BreadcrumbList,
-} from "@/components/ui/breadcrumb";
-import { Separator } from "@/components/ui/separator";
+} from '@/components/ui/breadcrumb';
+import { Separator } from '@/components/ui/separator';
 import {
   SidebarInset,
   SidebarProvider,
   SidebarTrigger,
-} from "@/components/ui/sidebar";
-import { Toaster } from "@/components/ui/sonner";
-import { useMenuStore } from "@/stores/menuStore";
+} from '@/components/ui/sidebar';
+import { Toaster } from '@/components/ui/sonner';
+import { useMenuStore } from '@/stores/menuStore';
 
 const Home = () => {
   const { currentMenu } = useMenuStore();
 
   const renderContent = () => {
     switch (currentMenu) {
-      case "Maps":
+      case 'Maps':
         return <Map />;
-      case "Roads":
+      case 'Roads':
         return <RoadSection />;
       default:
         return <Map />;
