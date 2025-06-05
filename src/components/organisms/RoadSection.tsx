@@ -46,6 +46,7 @@ const RoadSection = () => {
   const [selectedRoadForEdit, setSelectedRoadForEdit] =
     React.useState<Road | null>(null);
   const [roadToDelete, setRoadToDelete] = React.useState<Road | null>(null);
+
   const [roads, setRoads] = React.useState<Road[]>([]);
   const [roadMaterial, setRoadMaterial] = React.useState<RoadMaterial[]>([]);
   const [roadType, setRoadType] = React.useState<RoadTypeItem[]>([]);
@@ -53,6 +54,7 @@ const RoadSection = () => {
     []
   );
   const [allRegion, setAllRegion] = React.useState<RegionResponse>();
+
   const [currentPage, setCurrentPage] = React.useState(1);
   const itemsPerPage = 10;
   const [searchQuery, setSearchQuery] = React.useState("");

@@ -59,21 +59,18 @@ function GeomanControl() {
 }
 
 export default function MapPage() {
-  // Data states
   const [roads, setRoads] = useState<Road[]>([]);
   const [roadMaterial, setRoadMaterial] = useState<RoadMaterial[]>([]);
   const [roadType, setRoadType] = useState<RoadTypeItem[]>([]);
   const [roadCondition, setRoadCondition] = useState<RoadConditionItem[]>([]);
   const [allRegion, setAllRegion] = useState<RegionResponse>();
 
-  // Filter & Search states
   const [selectedMaterial, setSelectedMaterial] = useState<string>("all");
   const [selectedCondition, setSelectedCondition] = useState<string>("all");
   const [selectedType, setSelectedType] = useState<string>("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [filteredRoads, setFilteredRoads] = useState<Road[]>([]);
 
-  // UI states
   const [selectedRoadId, setSelectedRoadId] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -83,7 +80,6 @@ export default function MapPage() {
   const [roadToDelete, setRoadToDelete] = useState<Road | null>(null);
   const [openDialog, setOpenDialog] = useState(false);
 
-  // Pagination states
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
 
@@ -91,14 +87,12 @@ export default function MapPage() {
   const navigate = useNavigate();
   const mapRef = useRef<LeafletMap | null>(null);
 
-  // Calculate pagination
   const totalPages = Math.ceil(filteredRoads.length / itemsPerPage);
   const paginatedRoads = filteredRoads.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
 
-  // Helper functions
   const findName = (list: any[], id: number, key: string) =>
     list.find((item) => item.id === id)?.[key] || "-";
 
@@ -113,28 +107,24 @@ export default function MapPage() {
   const applyFilters = () => {
     let filtered = roads;
 
-    // Apply material filter
     if (selectedMaterial !== "all") {
       filtered = filtered.filter(
         (road) => road.eksisting_id === parseInt(selectedMaterial)
       );
     }
 
-    // Apply condition filter
     if (selectedCondition !== "all") {
       filtered = filtered.filter(
         (road) => road.kondisi_id === parseInt(selectedCondition)
       );
     }
 
-    // Apply type filter
     if (selectedType !== "all") {
       filtered = filtered.filter(
         (road) => road.jenisjalan_id === parseInt(selectedType)
       );
     }
 
-    // Apply search filter
     if (searchQuery.trim()) {
       const lowerQuery = searchQuery.toLowerCase();
       filtered = filtered.filter((road) => {
@@ -150,7 +140,6 @@ export default function MapPage() {
     setCurrentPage(1);
   };
 
-  // API handlers
   const handleApi = async (apiFunc: any, onSuccess: Function) => {
     try {
       const res = await apiFunc(token || "");
@@ -196,7 +185,6 @@ export default function MapPage() {
     }
   };
 
-  // Event handlers
   const handleRowClick = (road: Road) => {
     const map = mapRef.current;
     if (!map) return;
@@ -270,12 +258,10 @@ export default function MapPage() {
     fetchAll();
   }, []);
 
-  // Apply filters whenever roads or filter criteria change
   useEffect(() => {
     applyFilters();
   }, [roads, selectedMaterial, selectedCondition, selectedType, searchQuery]);
 
-  // Reset selected road when filters change
   useEffect(() => {
     setSelectedRoadId(null);
   }, [filteredRoads]);
