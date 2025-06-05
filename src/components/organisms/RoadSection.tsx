@@ -1,12 +1,12 @@
-import ViewMapDialog from '@/components/molecules/ViewMapDialog';
-import { Button } from '@/components/ui/button';
+import ViewMapDialog from "@/components/molecules/ViewMapDialog";
+import { Button } from "@/components/ui/button";
 import {
   Pagination,
   PaginationContent,
   PaginationItem,
   PaginationNext,
   PaginationPrevious,
-} from '@/components/ui/pagination';
+} from "@/components/ui/pagination";
 import {
   Table,
   TableBody,
@@ -14,7 +14,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/table';
+} from "@/components/ui/table";
 import {
   deleteRoadById,
   getAllRegion,
@@ -22,17 +22,17 @@ import {
   getRoadCondition,
   getRoadMaterial,
   getRoadType,
-} from '@/lib/api';
-import { useAuthStore } from '@/stores/authStore';
-import '@geoman-io/leaflet-geoman-free';
-import '@geoman-io/leaflet-geoman-free/dist/leaflet-geoman.css';
-import 'leaflet/dist/leaflet.css';
-import { Loader2, Pencil, Plus, Search, Trash, X } from 'lucide-react';
-import * as React from 'react';
-import { useNavigate } from 'react-router-dom';
-import { toast } from 'sonner';
-import ConfirmDialog from '../atoms/ConfirmDialog';
-import RoadFormDialog from './RoadFormDialog';
+} from "@/lib/api";
+import { useAuthStore } from "@/stores/authStore";
+import "@geoman-io/leaflet-geoman-free";
+import "@geoman-io/leaflet-geoman-free/dist/leaflet-geoman.css";
+import "leaflet/dist/leaflet.css";
+import { Loader2, Pencil, Plus, Trash, X } from "lucide-react";
+import * as React from "react";
+import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
+import ConfirmDialog from "../atoms/ConfirmDialog";
+import RoadFormDialog from "./RoadFormDialog";
 
 const RoadSection = () => {
   const { token } = useAuthStore();
@@ -54,21 +54,21 @@ const RoadSection = () => {
   );
   const [allRegion, setAllRegion] = React.useState<RegionResponse>();
   const [currentPage, setCurrentPage] = React.useState(1);
-  const itemsPerPage = 2;
-  const [searchQuery, setSearchQuery] = React.useState('');
+  const itemsPerPage = 10;
+  const [searchQuery, setSearchQuery] = React.useState("");
   const [filteredRoads, setFilteredRoads] = React.useState<Road[]>([]);
 
   const handleApi = async (apiFunc: any, onSuccess: Function) => {
     try {
-      const res = await apiFunc(token || '');
+      const res = await apiFunc(token || "");
       if (res.code === 200) return onSuccess(res);
       if (res.code >= 400 && res.code < 500) {
-        setError('Login session expired.');
-        setTimeout(() => navigate('/'), 2000);
-      } else setError('Internal server error.');
+        setError("Login session expired.");
+        setTimeout(() => navigate("/"), 2000);
+      } else setError("Internal server error.");
     } catch (e) {
-      console.error('API Error:', e);
-      setError('An error occurred while loading the data.');
+      console.error("API Error:", e);
+      setError("An error occurred while loading the data.");
     }
   };
 
@@ -79,7 +79,7 @@ const RoadSection = () => {
     );
   };
 
-  const handleSearch = () => {
+  const applySearch = () => {
     const lowerQuery = searchQuery.toLowerCase();
 
     const result = roads.filter((road) => {
@@ -96,25 +96,23 @@ const RoadSection = () => {
   };
 
   const handleClear = () => {
-    setSearchQuery('');
-    setFilteredRoads([]);
-    setCurrentPage(1);
+    setSearchQuery("");
   };
 
   const handleDelete = async () => {
     if (!roadToDelete) return;
 
     try {
-      const res = await deleteRoadById(roadToDelete.id, token || '');
+      const res = await deleteRoadById(roadToDelete.id, token || "");
       if (res.code === 200) {
-        toast.success('Road deleted successfully!');
+        toast.success("Road deleted successfully!");
         refreshRoadList();
       } else {
-        toast.error('Failed to delete road.');
+        toast.error("Failed to delete road.");
       }
     } catch (err) {
       console.error(err);
-      toast.error('An error occurred during deletion.');
+      toast.error("An error occurred during deletion.");
     } finally {
       setRoadToDelete(null);
     }
@@ -144,22 +142,24 @@ const RoadSection = () => {
   }, []);
 
   const findName = (list: any[], id: number, key: string) =>
-    list.find((item) => item.id === id)?.[key] || '-';
+    list.find((item) => item.id === id)?.[key] || "-";
 
   const getMaterialName = (id: number) =>
-    findName(roadMaterial, id, 'eksisting');
+    findName(roadMaterial, id, "eksisting");
   const getConditionName = (id: number) =>
-    findName(roadCondition, id, 'kondisi');
-  const getTypeName = (id: number) => findName(roadType, id, 'jenisjalan');
+    findName(roadCondition, id, "kondisi");
+  const getTypeName = (id: number) => findName(roadType, id, "jenisjalan");
   const getVillageName = (id: number) =>
-    allRegion?.desa.find((d) => d.id === id)?.desa || '-';
-  const dataToPaginate =
-    searchQuery && filteredRoads.length > 0 ? filteredRoads : roads;
-  const paginatedRoads = dataToPaginate.slice(
+    allRegion?.desa.find((d) => d.id === id)?.desa || "-";
+  const totalPages = Math.ceil(filteredRoads.length / itemsPerPage);
+  const paginatedRoads = filteredRoads.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
-  const totalPages = Math.ceil(dataToPaginate.length / itemsPerPage);
+
+  React.useEffect(() => {
+    applySearch();
+  }, [roads, searchQuery]);
 
   if (loading)
     return (
@@ -174,7 +174,7 @@ const RoadSection = () => {
 
   return (
     <>
-      <div className="flex gap-2 mb-4 px-2 pt-2 items-center">
+      <div className="flex gap-2 my-4 items-center">
         <input
           type="text"
           value={searchQuery}
@@ -182,13 +182,16 @@ const RoadSection = () => {
           placeholder="Search code, name, or village"
           className="border px-2 py-2 rounded-md w-full"
         />
-        <Button onClick={handleSearch} variant="outline" className="p-5">
-          <Search className="w-5 h-5" />
-        </Button>
         <Button onClick={handleClear} variant="outline" className="p-5">
           <X className="w-5 h-5" />
         </Button>
       </div>
+      <div className="text-sm text-gray-600 my-2">
+        Showing {paginatedRoads.length} of {filteredRoads.length} roads
+        {filteredRoads.length !== roads.length &&
+          ` (filtered from ${roads.length} total)`}
+      </div>
+
       <Table>
         <TableHeader>
           <TableRow>
@@ -206,96 +209,110 @@ const RoadSection = () => {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {paginatedRoads.map((road) => (
-            <TableRow key={road.id}>
-              <TableCell>{road.kode_ruas}</TableCell>
-              <TableCell>{road.nama_ruas}</TableCell>
-              <TableCell className="truncate max-w-[300px] whitespace-nowrap overflow-hidden">
-                {road.keterangan}
-              </TableCell>
-              <TableCell className="text-center">
-                {getVillageName(road.desa_id)}
-              </TableCell>
-              <TableCell className="text-center">
-                {road.panjang / 1000}
-              </TableCell>
-              <TableCell className="text-center">{road.lebar}</TableCell>
-              <TableCell className="text-center">
-                {getMaterialName(road.eksisting_id)}
-              </TableCell>
-              <TableCell className="text-center">
-                {getConditionName(road.kondisi_id)}
-              </TableCell>
-              <TableCell className="text-center">
-                {getTypeName(road.jenisjalan_id)}
-              </TableCell>
-              <TableCell className="text-center">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setSelectedRoadForMap(road)}
-                >
-                  View
-                </Button>
-              </TableCell>
-              <TableCell className="text-center">
-                <div className="flex justify-center space-x-1">
+          {paginatedRoads.length > 0 ? (
+            paginatedRoads.map((road) => (
+              <TableRow key={road.id}>
+                <TableCell>{road.kode_ruas}</TableCell>
+                <TableCell>{road.nama_ruas}</TableCell>
+                <TableCell className="truncate max-w-[300px] whitespace-nowrap overflow-hidden">
+                  {road.keterangan}
+                </TableCell>
+                <TableCell className="text-center">
+                  {getVillageName(road.desa_id)}
+                </TableCell>
+                <TableCell className="text-center">
+                  {road.panjang / 1000}
+                </TableCell>
+                <TableCell className="text-center">{road.lebar}</TableCell>
+                <TableCell className="text-center">
+                  {getMaterialName(road.eksisting_id)}
+                </TableCell>
+                <TableCell className="text-center">
+                  {getConditionName(road.kondisi_id)}
+                </TableCell>
+                <TableCell className="text-center">
+                  {getTypeName(road.jenisjalan_id)}
+                </TableCell>
+                <TableCell className="text-center">
                   <Button
-                    variant="default"
+                    variant="outline"
                     size="sm"
-                    onClick={() => {
-                      setSelectedRoadForEdit(road);
-                      setOpenDialog(true);
-                    }}
-                    className="bg-amber-500 hover:bg-amber-400"
+                    onClick={() => setSelectedRoadForMap(road)}
                   >
-                    <Pencil />
+                    View
                   </Button>
-                  <Button
-                    variant="destructive"
-                    size="sm"
-                    className="hover:bg-red-400"
-                    onClick={() => setRoadToDelete(road)}
-                  >
-                    <Trash />
-                  </Button>
-                </div>
+                </TableCell>
+                <TableCell className="text-center">
+                  <div className="flex justify-center space-x-1">
+                    <Button
+                      variant="default"
+                      size="sm"
+                      onClick={() => {
+                        setSelectedRoadForEdit(road);
+                        setOpenDialog(true);
+                      }}
+                      className="bg-amber-500 hover:bg-amber-400"
+                    >
+                      <Pencil />
+                    </Button>
+                    <Button
+                      variant="destructive"
+                      size="sm"
+                      className="hover:bg-red-400"
+                      onClick={() => setRoadToDelete(road)}
+                    >
+                      <Trash />
+                    </Button>
+                  </div>
+                </TableCell>
+              </TableRow>
+            ))
+          ) : (
+            <TableRow>
+              <TableCell
+                colSpan={11}
+                className="text-center py-4 text-gray-500"
+              >
+                No roads found matching your criteria
               </TableCell>
             </TableRow>
-          ))}
+          )}
         </TableBody>
       </Table>
-      <Pagination className="mt-4 justify-center">
-        <PaginationContent>
-          <PaginationItem>
-            <PaginationPrevious
-              onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-              className={
-                currentPage === 1
-                  ? 'pointer-events-none opacity-50'
-                  : 'cursor-pointer'
-              }
-            />
-          </PaginationItem>
-          <PaginationItem>
-            <span className="text-sm px-4 py-2">
-              Page {currentPage} of {totalPages}
-            </span>
-          </PaginationItem>
-          <PaginationItem>
-            <PaginationNext
-              onClick={() =>
-                setCurrentPage((prev) => Math.min(prev + 1, totalPages))
-              }
-              className={
-                currentPage === totalPages
-                  ? 'pointer-events-none opacity-50'
-                  : 'cursor-pointer'
-              }
-            />
-          </PaginationItem>
-        </PaginationContent>
-      </Pagination>
+      {totalPages > 1 && (
+        <Pagination className="mt-4 justify-center">
+          <PaginationContent>
+            <PaginationItem>
+              <PaginationPrevious
+                onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+                className={
+                  currentPage === 1
+                    ? "pointer-events-none opacity-50"
+                    : "cursor-pointer"
+                }
+              />
+            </PaginationItem>
+            <PaginationItem>
+              <span className="text-sm px-4 py-2">
+                Page {currentPage} of {totalPages}
+              </span>
+            </PaginationItem>
+            <PaginationItem>
+              <PaginationNext
+                onClick={() =>
+                  setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+                }
+                className={
+                  currentPage === totalPages
+                    ? "pointer-events-none opacity-50"
+                    : "cursor-pointer"
+                }
+              />
+            </PaginationItem>
+          </PaginationContent>
+        </Pagination>
+      )}
+
       <Button
         className="fixed bottom-7 right-7 rounded-xl h-12 w-12 p-0 text-white hover:bg-primary/90"
         onClick={() => {
@@ -324,8 +341,8 @@ const RoadSection = () => {
           onSuccess={() => {
             toast.success(
               selectedRoadForEdit
-                ? 'Road updated successfully!'
-                : 'Road added successfully!'
+                ? "Road updated successfully!"
+                : "Road added successfully!"
             );
             refreshRoadList();
           }}
