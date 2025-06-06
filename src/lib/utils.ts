@@ -1,6 +1,6 @@
-import { clsx, type ClassValue } from "clsx";
-import { twMerge } from "tailwind-merge";
-import * as polyline from "@mapbox/polyline";
+import * as polyline from '@mapbox/polyline';
+import { clsx, type ClassValue } from 'clsx';
+import { twMerge } from 'tailwind-merge';
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -9,16 +9,16 @@ export function cn(...inputs: ClassValue[]) {
 export function toTitleCase(str: string): string {
   return str
     .toLowerCase()
-    .split(" ")
+    .split(' ')
     .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-    .join(" ");
+    .join(' ');
 }
 
 export function decodePath(pathString: string): [number, number][] {
   try {
     return polyline.decode(pathString) as [number, number][];
   } catch (e) {
-    console.error("Failed to decode polyline path:", e);
+    console.error('Failed to decode polyline path:', e);
     return [];
   }
 }
@@ -47,3 +47,31 @@ export function getPolylineLength(path: [number, number][]): number {
   }
   return total;
 }
+
+export const handleApi = async <T>(
+  apiFunc: (token: string) => Promise<T>,
+  token: string,
+  onSuccess: (res: T) => void,
+  options?: {
+    onError?: (message: string) => void;
+    onExpired?: () => void;
+  }
+) => {
+  try {
+    const res: any = await apiFunc(token);
+
+    if (res.code === 200) {
+      return onSuccess(res);
+    }
+
+    if (res.code >= 400 && res.code < 500) {
+      options?.onError?.('Login session expired.');
+      options?.onExpired?.();
+    } else {
+      options?.onError?.('Internal server error.');
+    }
+  } catch (e) {
+    console.error('API Error:', e);
+    options?.onError?.('An error occurred while loading the data.');
+  }
+};

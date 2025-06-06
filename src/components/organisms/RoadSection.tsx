@@ -1,12 +1,5 @@
-import ViewMapDialog from "@/components/molecules/ViewMapDialog";
-import { Button } from "@/components/ui/button";
-import {
-  Pagination,
-  PaginationContent,
-  PaginationItem,
-  PaginationNext,
-  PaginationPrevious,
-} from "@/components/ui/pagination";
+import ViewMapDialog from '@/components/molecules/ViewMapDialog';
+import { Button } from '@/components/ui/button';
 import {
   Table,
   TableBody,
@@ -14,7 +7,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
+} from '@/components/ui/table';
 import {
   deleteRoadById,
   getAllRegion,
@@ -22,17 +15,21 @@ import {
   getRoadCondition,
   getRoadMaterial,
   getRoadType,
-} from "@/lib/api";
-import { useAuthStore } from "@/stores/authStore";
-import "@geoman-io/leaflet-geoman-free";
-import "@geoman-io/leaflet-geoman-free/dist/leaflet-geoman.css";
-import "leaflet/dist/leaflet.css";
-import { Loader2, Pencil, Plus, Trash, X } from "lucide-react";
-import * as React from "react";
-import { useNavigate } from "react-router-dom";
-import { toast } from "sonner";
-import ConfirmDialog from "../atoms/ConfirmDialog";
-import RoadFormDialog from "./RoadFormDialog";
+} from '@/lib/api';
+import { handleApi } from '@/lib/utils';
+import { useAuthStore } from '@/stores/authStore';
+import '@geoman-io/leaflet-geoman-free';
+import '@geoman-io/leaflet-geoman-free/dist/leaflet-geoman.css';
+import 'leaflet/dist/leaflet.css';
+import { Pencil, Plus, Trash } from 'lucide-react';
+import * as React from 'react';
+import { useNavigate } from 'react-router-dom';
+import { toast } from 'sonner';
+import ConfirmDialog from '../atoms/ConfirmDialog';
+import Loading from '../atoms/Loading';
+import { PaginationControls } from '../atoms/PaginationControls';
+import { SearchInputWithClear } from '../atoms/SearchInputWithClear';
+import RoadFormDialog from './RoadFormDialog';
 
 const RoadSection = () => {
   const { token } = useAuthStore();
@@ -57,27 +54,19 @@ const RoadSection = () => {
 
   const [currentPage, setCurrentPage] = React.useState(1);
   const itemsPerPage = 10;
-  const [searchQuery, setSearchQuery] = React.useState("");
+  const [searchQuery, setSearchQuery] = React.useState('');
   const [filteredRoads, setFilteredRoads] = React.useState<Road[]>([]);
-
-  const handleApi = async (apiFunc: any, onSuccess: Function) => {
-    try {
-      const res = await apiFunc(token || "");
-      if (res.code === 200) return onSuccess(res);
-      if (res.code >= 400 && res.code < 500) {
-        setError("Login session expired.");
-        setTimeout(() => navigate("/"), 2000);
-      } else setError("Internal server error.");
-    } catch (e) {
-      console.error("API Error:", e);
-      setError("An error occurred while loading the data.");
-    }
-  };
 
   const refreshRoadList = async () => {
     setCurrentPage(1);
-    await handleApi(getAllRoads, (res: AllRoadsResponse) =>
-      setRoads(res.ruasjalan || [])
+    await handleApi(
+      getAllRoads,
+      token || '',
+      (res: AllRoadsResponse) => setRoads(res.ruasjalan || []),
+      {
+        onError: setError,
+        onExpired: () => setTimeout(() => navigate('/'), 2000),
+      }
     );
   };
 
@@ -98,23 +87,23 @@ const RoadSection = () => {
   };
 
   const handleClear = () => {
-    setSearchQuery("");
+    setSearchQuery('');
   };
 
   const handleDelete = async () => {
     if (!roadToDelete) return;
 
     try {
-      const res = await deleteRoadById(roadToDelete.id, token || "");
+      const res = await deleteRoadById(roadToDelete.id, token || '');
       if (res.code === 200) {
-        toast.success("Road deleted successfully!");
+        toast.success('Road deleted successfully!');
         refreshRoadList();
       } else {
-        toast.error("Failed to delete road.");
+        toast.error('Failed to delete road.');
       }
     } catch (err) {
       console.error(err);
-      toast.error("An error occurred during deletion.");
+      toast.error('An error occurred during deletion.');
     } finally {
       setRoadToDelete(null);
     }
@@ -124,19 +113,42 @@ const RoadSection = () => {
     const fetchAll = async () => {
       setLoading(true);
       await Promise.all([
-        handleApi(getAllRoads, (res: AllRoadsResponse) =>
-          setRoads(res.ruasjalan || [])
+        handleApi(
+          getAllRoads,
+          token || '',
+          (res) => setRoads(res.ruasjalan || []),
+          {
+            onError: setError,
+            onExpired: () => setTimeout(() => navigate('/'), 2000),
+          }
         ),
-        handleApi(getRoadMaterial, (res: RoadMaterialResponse) =>
-          setRoadMaterial(res.eksisting || [])
+        handleApi(
+          getRoadMaterial,
+          token || '',
+          (res) => setRoadMaterial(res.eksisting || []),
+          {
+            onError: setError,
+          }
         ),
-        handleApi(getRoadType, (res: RoadType) =>
-          setRoadType(res.eksisting || [])
+        handleApi(
+          getRoadType,
+          token || '',
+          (res) => setRoadType(res.eksisting || []),
+          {
+            onError: setError,
+          }
         ),
-        handleApi(getRoadCondition, (res: RoadCondition) =>
-          setRoadCondition(res.eksisting || [])
+        handleApi(
+          getRoadCondition,
+          token || '',
+          (res) => setRoadCondition(res.eksisting || []),
+          {
+            onError: setError,
+          }
         ),
-        handleApi(getAllRegion, setAllRegion),
+        handleApi(getAllRegion, token || '', setAllRegion, {
+          onError: setError,
+        }),
       ]);
       setLoading(false);
     };
@@ -144,15 +156,15 @@ const RoadSection = () => {
   }, []);
 
   const findName = (list: any[], id: number, key: string) =>
-    list.find((item) => item.id === id)?.[key] || "-";
+    list.find((item) => item.id === id)?.[key] || '-';
 
   const getMaterialName = (id: number) =>
-    findName(roadMaterial, id, "eksisting");
+    findName(roadMaterial, id, 'eksisting');
   const getConditionName = (id: number) =>
-    findName(roadCondition, id, "kondisi");
-  const getTypeName = (id: number) => findName(roadType, id, "jenisjalan");
+    findName(roadCondition, id, 'kondisi');
+  const getTypeName = (id: number) => findName(roadType, id, 'jenisjalan');
   const getVillageName = (id: number) =>
-    allRegion?.desa.find((d) => d.id === id)?.desa || "-";
+    allRegion?.desa.find((d) => d.id === id)?.desa || '-';
   const totalPages = Math.ceil(filteredRoads.length / itemsPerPage);
   const paginatedRoads = filteredRoads.slice(
     (currentPage - 1) * itemsPerPage,
@@ -163,31 +175,19 @@ const RoadSection = () => {
     applySearch();
   }, [roads, searchQuery]);
 
-  if (loading)
-    return (
-      <div className="flex m-5 justify-center">
-        <Loader2 className="mx-2 animate-spin" />
-        Loading roads data...
-      </div>
-    );
+  if (loading) return <Loading loadingText="Loading roads data..." />;
 
   if (error)
     return <div className="text-red-500 flex m-5 justify-center">{error}</div>;
 
   return (
     <>
-      <div className="flex gap-2 my-4 items-center">
-        <input
-          type="text"
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          placeholder="Search code, name, or village"
-          className="border px-2 py-2 rounded-md w-full"
-        />
-        <Button onClick={handleClear} variant="outline" className="p-5">
-          <X className="w-5 h-5" />
-        </Button>
-      </div>
+      <SearchInputWithClear
+        value={searchQuery}
+        onChange={setSearchQuery}
+        onClear={handleClear}
+        placeholder="Search code, name, or village"
+      />
       <div className="text-sm text-gray-600 my-2">
         Showing {paginatedRoads.length} of {filteredRoads.length} roads
         {filteredRoads.length !== roads.length &&
@@ -282,37 +282,11 @@ const RoadSection = () => {
         </TableBody>
       </Table>
       {totalPages > 1 && (
-        <Pagination className="mt-4 justify-center">
-          <PaginationContent>
-            <PaginationItem>
-              <PaginationPrevious
-                onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-                className={
-                  currentPage === 1
-                    ? "pointer-events-none opacity-50"
-                    : "cursor-pointer"
-                }
-              />
-            </PaginationItem>
-            <PaginationItem>
-              <span className="text-sm px-4 py-2">
-                Page {currentPage} of {totalPages}
-              </span>
-            </PaginationItem>
-            <PaginationItem>
-              <PaginationNext
-                onClick={() =>
-                  setCurrentPage((prev) => Math.min(prev + 1, totalPages))
-                }
-                className={
-                  currentPage === totalPages
-                    ? "pointer-events-none opacity-50"
-                    : "cursor-pointer"
-                }
-              />
-            </PaginationItem>
-          </PaginationContent>
-        </Pagination>
+        <PaginationControls
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={setCurrentPage}
+        />
       )}
 
       <Button
@@ -343,8 +317,8 @@ const RoadSection = () => {
           onSuccess={() => {
             toast.success(
               selectedRoadForEdit
-                ? "Road updated successfully!"
-                : "Road added successfully!"
+                ? 'Road updated successfully!'
+                : 'Road added successfully!'
             );
             refreshRoadList();
           }}
