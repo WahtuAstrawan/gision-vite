@@ -47,7 +47,7 @@ const ViewMapDialog: React.FC<ViewMapDialogProps> = ({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-3xl">
         <DialogHeader>
-          <DialogTitle>Road View - {roadName}</DialogTitle>
+          <DialogTitle>{roadName}</DialogTitle>
         </DialogHeader>
         <div className="h-[400px] w-full">
           <MapContainer
