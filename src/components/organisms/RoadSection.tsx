@@ -305,6 +305,7 @@ const RoadSection = () => {
           paths={selectedRoadForMap.paths}
           roadName={selectedRoadForMap.nama_ruas}
           roadType={selectedRoadForMap.jenisjalan_id}
+          conditionId={selectedRoadForMap.kondisi_id}
         />
       )}
       {allRegion && (

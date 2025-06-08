@@ -75,3 +75,37 @@ export const handleApi = async <T>(
     options?.onError?.('An error occurred while loading the data.');
   }
 };
+
+export const getDashArray = (
+  kondisiId: number | string
+): string | undefined => {
+  switch (kondisiId) {
+    case 1:
+      return '';
+    case 2:
+      return '6 4';
+    case 3:
+      return '2 6';
+    case 'Baik':
+      return '';
+    case 'Sedang':
+      return '6 4';
+    case 'Rusak':
+      return '2 6';
+    default:
+      return undefined;
+  }
+};
+
+export const getRoadColor = (jenisjalanId: number) => {
+  switch (jenisjalanId) {
+    case 3:
+      return 'blue';
+    case 2:
+      return 'red';
+    case 1:
+      return 'green';
+    default:
+      return 'black';
+  }
+};

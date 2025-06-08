@@ -4,6 +4,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import { getDashArray, getRoadColor } from '@/lib/utils';
 import polyline from '@mapbox/polyline';
 import type { LatLngTuple } from 'leaflet';
 import 'leaflet/dist/leaflet.css';
@@ -20,6 +21,7 @@ interface ViewMapDialogProps {
   paths: string;
   roadName: string;
   roadType: number;
+  conditionId: number;
 }
 
 const ViewMapDialog: React.FC<ViewMapDialogProps> = ({
@@ -28,6 +30,7 @@ const ViewMapDialog: React.FC<ViewMapDialogProps> = ({
   paths,
   roadName,
   roadType,
+  conditionId,
 }) => {
   let decodedPath: [number, number][] = [];
   try {
@@ -38,12 +41,7 @@ const ViewMapDialog: React.FC<ViewMapDialogProps> = ({
 
   const center: LatLngTuple =
     decodedPath.length > 0 ? [decodedPath[0][0], decodedPath[0][1]] : [0, 0];
-  let color = 'blue';
-  if (roadType === 1) {
-    color = 'green';
-  } else if (roadType === 2) {
-    color = 'red';
-  }
+  const color = getRoadColor(roadType);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -60,7 +58,11 @@ const ViewMapDialog: React.FC<ViewMapDialogProps> = ({
           >
             <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
             {decodedPath.length > 0 && (
-              <LeafletPolyline positions={decodedPath} color={color} />
+              <LeafletPolyline
+                positions={decodedPath}
+                color={color}
+                dashArray={getDashArray(conditionId)}
+              />
             )}
           </MapContainer>
         </div>

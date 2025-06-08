@@ -14,7 +14,7 @@ import {
   getRoadMaterial,
   getRoadType,
 } from '@/lib/api';
-import { decodePath, handleApi } from '@/lib/utils';
+import { decodePath, getDashArray, getRoadColor, handleApi } from '@/lib/utils';
 import { useAuthStore } from '@/stores/authStore';
 import '@geoman-io/leaflet-geoman-free';
 import '@geoman-io/leaflet-geoman-free/dist/leaflet-geoman.css';
@@ -186,30 +186,6 @@ export default function MapPage() {
     setSelectedMaterial('all');
     setSelectedCondition('all');
     setSelectedType('all');
-  };
-
-  const getRoadColor = (road: Road) => {
-    switch (road.jenisjalan_id) {
-      case 3:
-        return 'blue';
-      case 2:
-        return 'red';
-      default:
-        return 'green';
-    }
-  };
-
-  const getDashArray = (kondisiId: number): string | undefined => {
-    switch (kondisiId) {
-      case 1:
-        return '';
-      case 2:
-        return '6 4';
-      case 3:
-        return '2 6';
-      default:
-        return undefined;
-    }
   };
 
   useEffect(() => {
@@ -455,7 +431,9 @@ export default function MapPage() {
             if (decodedPath.length === 0) return null;
 
             const isSelected = road.id === selectedRoadId;
-            const roadColor = isSelected ? 'yellow' : getRoadColor(road);
+            const roadColor = isSelected
+              ? 'yellow'
+              : getRoadColor(road.jenisjalan_id);
 
             return (
               <Polyline
@@ -463,7 +441,7 @@ export default function MapPage() {
                 positions={decodedPath}
                 color={roadColor}
                 dashArray={getDashArray(road.kondisi_id)}
-                weight={road.jenisjalan_id * 3}
+                weight={road.jenisjalan_id * 2.8}
                 opacity={isSelected ? 1 : 0.8}
               >
                 <Tooltip direction="top" sticky>
