@@ -443,6 +443,11 @@ export default function MapPage() {
                 dashArray={getDashArray(road.kondisi_id)}
                 weight={road.jenisjalan_id * 2.8}
                 opacity={isSelected ? 1 : 0.8}
+                eventHandlers={{
+                  click: () => {
+                    handleRowClick(road);
+                  },
+                }}
               >
                 <Tooltip direction="top" sticky>
                   <div>

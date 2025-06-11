@@ -182,12 +182,14 @@ const RoadSection = () => {
 
   return (
     <>
-      <SearchInputWithClear
-        value={searchQuery}
-        onChange={setSearchQuery}
-        onClear={handleClear}
-        placeholder="Search code, name, or village"
-      />
+      <div className="pt-4">
+        <SearchInputWithClear
+          value={searchQuery}
+          onChange={setSearchQuery}
+          onClear={handleClear}
+          placeholder="Search code, name, or village"
+        />
+      </div>
       <div className="text-sm text-gray-600 my-2">
         Showing {paginatedRoads.length} of {filteredRoads.length} roads
         {filteredRoads.length !== roads.length &&
