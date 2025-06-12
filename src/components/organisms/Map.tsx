@@ -5,7 +5,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/table';
+} from "@/components/ui/table";
 import {
   deleteRoadById,
   getAllRegion,
@@ -13,33 +13,33 @@ import {
   getRoadCondition,
   getRoadMaterial,
   getRoadType,
-} from '@/lib/api';
-import { decodePath, getDashArray, getRoadColor, handleApi } from '@/lib/utils';
-import { useAuthStore } from '@/stores/authStore';
-import '@geoman-io/leaflet-geoman-free';
-import '@geoman-io/leaflet-geoman-free/dist/leaflet-geoman.css';
-import L, { Map as LeafletMap } from 'leaflet';
-import 'leaflet/dist/leaflet.css';
-import { Pencil, Trash } from 'lucide-react';
-import { useEffect, useRef, useState } from 'react';
+} from "@/lib/api";
+import { decodePath, getDashArray, getRoadColor, handleApi } from "@/lib/utils";
+import { useAuthStore } from "@/stores/authStore";
+import "@geoman-io/leaflet-geoman-free";
+import "@geoman-io/leaflet-geoman-free/dist/leaflet-geoman.css";
+import L, { Map as LeafletMap } from "leaflet";
+import "leaflet/dist/leaflet.css";
+import { Pencil, Trash } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 import {
   MapContainer,
   Polyline,
   TileLayer,
   Tooltip,
   useMap,
-} from 'react-leaflet';
-import { useNavigate } from 'react-router-dom';
-import { toast } from 'sonner';
-import ConfirmDialog from '../atoms/ConfirmDialog';
-import Legend from '../atoms/Legend';
-import Loading from '../atoms/Loading';
-import { PaginationControls } from '../atoms/PaginationControls';
-import { SearchInputWithClear } from '../atoms/SearchInputWithClear';
-import { FilterControls } from '../molecules/FilterControls';
-import { Alert, AlertDescription } from '../ui/alert';
-import { Button } from '../ui/button';
-import RoadFormDialog from './RoadFormDialog';
+} from "react-leaflet";
+import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
+import ConfirmDialog from "../atoms/ConfirmDialog";
+import Legend from "../atoms/Legend";
+import Loading from "../atoms/Loading";
+import { PaginationControls } from "../atoms/PaginationControls";
+import { SearchInputWithClear } from "../atoms/SearchInputWithClear";
+import { FilterControls } from "../molecules/FilterControls";
+import { Alert, AlertDescription } from "../ui/alert";
+import { Button } from "../ui/button";
+import RoadFormDialog from "./RoadFormDialog";
 
 function GeomanControl() {
   const map = useMap();
@@ -49,17 +49,17 @@ function GeomanControl() {
   return null;
 }
 
-export default function MapPage() {
+export default function Map() {
   const [roads, setRoads] = useState<Road[]>([]);
   const [roadMaterial, setRoadMaterial] = useState<RoadMaterial[]>([]);
   const [roadType, setRoadType] = useState<RoadTypeItem[]>([]);
   const [roadCondition, setRoadCondition] = useState<RoadConditionItem[]>([]);
   const [allRegion, setAllRegion] = useState<RegionResponse>();
 
-  const [selectedMaterial, setSelectedMaterial] = useState<string>('all');
-  const [selectedCondition, setSelectedCondition] = useState<string>('all');
-  const [selectedType, setSelectedType] = useState<string>('all');
-  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedMaterial, setSelectedMaterial] = useState<string>("all");
+  const [selectedCondition, setSelectedCondition] = useState<string>("all");
+  const [selectedType, setSelectedType] = useState<string>("all");
+  const [searchQuery, setSearchQuery] = useState("");
   const [filteredRoads, setFilteredRoads] = useState<Road[]>([]);
 
   const [selectedRoadId, setSelectedRoadId] = useState<number | null>(null);
@@ -85,32 +85,32 @@ export default function MapPage() {
   );
 
   const findName = (list: any[], id: number, key: string) =>
-    list.find((item) => item.id === id)?.[key] || '-';
+    list.find((item) => item.id === id)?.[key] || "-";
 
   const getMaterialName = (id: number) =>
-    findName(roadMaterial, id, 'eksisting');
+    findName(roadMaterial, id, "eksisting");
   const getConditionName = (id: number) =>
-    findName(roadCondition, id, 'kondisi');
-  const getTypeName = (id: number) => findName(roadType, id, 'jenisjalan');
+    findName(roadCondition, id, "kondisi");
+  const getTypeName = (id: number) => findName(roadType, id, "jenisjalan");
   const getVillageName = (id: number) =>
-    allRegion?.desa.find((d) => d.id === id)?.desa || '-';
+    allRegion?.desa.find((d) => d.id === id)?.desa || "-";
 
   const applyFilters = () => {
     let filtered = roads;
 
-    if (selectedMaterial !== 'all') {
+    if (selectedMaterial !== "all") {
       filtered = filtered.filter(
         (road) => road.eksisting_id === parseInt(selectedMaterial)
       );
     }
 
-    if (selectedCondition !== 'all') {
+    if (selectedCondition !== "all") {
       filtered = filtered.filter(
         (road) => road.kondisi_id === parseInt(selectedCondition)
       );
     }
 
-    if (selectedType !== 'all') {
+    if (selectedType !== "all") {
       filtered = filtered.filter(
         (road) => road.jenisjalan_id === parseInt(selectedType)
       );
@@ -133,13 +133,13 @@ export default function MapPage() {
 
   const fetchAllRoads = async () => {
     try {
-      const res = await getAllRoads(token || '');
+      const res = await getAllRoads(token || "");
       if (res.code === 200) {
         setRoads(res.ruasjalan || []);
       }
     } catch (e) {
       console.error(e);
-      setError('Failed to load road data.');
+      setError("Failed to load road data.");
     }
   };
 
@@ -147,16 +147,16 @@ export default function MapPage() {
     if (!roadToDelete) return;
 
     try {
-      const res = await deleteRoadById(roadToDelete.id, token || '');
+      const res = await deleteRoadById(roadToDelete.id, token || "");
       if (res.code === 200) {
-        toast.success('Road deleted successfully!');
+        toast.success("Road deleted successfully!");
         await fetchAllRoads();
       } else {
-        toast.error('Failed to delete road.');
+        toast.error("Failed to delete road.");
       }
     } catch (err) {
       console.error(err);
-      toast.error('An error occurred during deletion.');
+      toast.error("An error occurred during deletion.");
     } finally {
       setRoadToDelete(null);
     }
@@ -179,13 +179,13 @@ export default function MapPage() {
   };
 
   const handleClearSearch = () => {
-    setSearchQuery('');
+    setSearchQuery("");
   };
 
   const handleClearFilters = () => {
-    setSelectedMaterial('all');
-    setSelectedCondition('all');
-    setSelectedType('all');
+    setSelectedMaterial("all");
+    setSelectedCondition("all");
+    setSelectedType("all");
   };
 
   useEffect(() => {
@@ -194,16 +194,16 @@ export default function MapPage() {
       await Promise.all([
         handleApi(
           getAllRoads,
-          token || '',
+          token || "",
           (res) => setRoads(res.ruasjalan || []),
           {
             onError: setError,
-            onExpired: () => setTimeout(() => navigate('/'), 2000),
+            onExpired: () => setTimeout(() => navigate("/"), 2000),
           }
         ),
         handleApi(
           getRoadMaterial,
-          token || '',
+          token || "",
           (res) => setRoadMaterial(res.eksisting || []),
           {
             onError: setError,
@@ -211,7 +211,7 @@ export default function MapPage() {
         ),
         handleApi(
           getRoadType,
-          token || '',
+          token || "",
           (res) => setRoadType(res.eksisting || []),
           {
             onError: setError,
@@ -219,13 +219,13 @@ export default function MapPage() {
         ),
         handleApi(
           getRoadCondition,
-          token || '',
+          token || "",
           (res) => setRoadCondition(res.eksisting || []),
           {
             onError: setError,
           }
         ),
-        handleApi(getAllRegion, token || '', setAllRegion, {
+        handleApi(getAllRegion, token || "", setAllRegion, {
           onError: setError,
         }),
       ]);
@@ -308,7 +308,7 @@ export default function MapPage() {
                       key={road.id}
                       onClick={() => handleRowClick(road)}
                       className={`cursor-pointer hover:bg-gray-50 ${
-                        selectedRoadId === road.id ? 'bg-gray-200' : ''
+                        selectedRoadId === road.id ? "bg-gray-200" : ""
                       }`}
                     >
                       <TableCell>{road.kode_ruas}</TableCell>
@@ -381,8 +381,8 @@ export default function MapPage() {
                 onSuccess={async () => {
                   toast.success(
                     selectedRoadForEdit
-                      ? 'Road updated successfully!'
-                      : 'Road added successfully!'
+                      ? "Road updated successfully!"
+                      : "Road added successfully!"
                   );
                   await fetchAllRoads();
                 }}
@@ -419,7 +419,7 @@ export default function MapPage() {
           center={[-8.782802, 115.17815]}
           zoom={11}
           zoomControl={false}
-          style={{ height: '100%', width: '100%' }}
+          style={{ height: "100%", width: "100%" }}
           ref={(node) => {
             if (node) mapRef.current = node;
           }}
@@ -432,7 +432,7 @@ export default function MapPage() {
 
             const isSelected = road.id === selectedRoadId;
             const roadColor = isSelected
-              ? 'yellow'
+              ? "yellow"
               : getRoadColor(road.jenisjalan_id);
 
             return (
@@ -453,11 +453,11 @@ export default function MapPage() {
                   <div>
                     <strong>{road.nama_ruas}</strong>
                     <br />
-                    Length: {road.panjang / 1000 || '-'} km
+                    Length: {road.panjang / 1000 || "-"} km
                     <br />
-                    Width: {road.lebar || '-'} m
+                    Width: {road.lebar || "-"} m
                     <br />
-                    Desc: {road.keterangan || '-'}
+                    Desc: {road.keterangan || "-"}
                   </div>
                 </Tooltip>
               </Polyline>
