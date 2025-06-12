@@ -14,7 +14,13 @@ import {
   getRoadMaterial,
   getRoadType,
 } from "@/lib/api";
-import { decodePath, getDashArray, getRoadColor, handleApi } from "@/lib/utils";
+import {
+  decodePath,
+  findName,
+  getDashArray,
+  getRoadColor,
+  handleApi,
+} from "@/lib/utils";
 import { useAuthStore } from "@/stores/authStore";
 import "@geoman-io/leaflet-geoman-free";
 import "@geoman-io/leaflet-geoman-free/dist/leaflet-geoman.css";
@@ -40,6 +46,7 @@ import { FilterControls } from "../molecules/FilterControls";
 import { Alert, AlertDescription } from "../ui/alert";
 import { Button } from "../ui/button";
 import RoadFormDialog from "./RoadFormDialog";
+import ShowDialog from "../atoms/ShowDialog";
 
 function GeomanControl() {
   const map = useMap();
@@ -69,6 +76,7 @@ export default function Map() {
     null
   );
   const [roadToDelete, setRoadToDelete] = useState<Road | null>(null);
+  const [descToShow, setDescToShow] = useState<string | null>(null);
   const [openDialog, setOpenDialog] = useState(false);
 
   const [currentPage, setCurrentPage] = useState(1);
@@ -84,16 +92,13 @@ export default function Map() {
     currentPage * itemsPerPage
   );
 
-  const findName = (list: any[], id: number, key: string) =>
-    list.find((item) => item.id === id)?.[key] || "-";
-
   const getMaterialName = (id: number) =>
     findName(roadMaterial, id, "eksisting");
   const getConditionName = (id: number) =>
     findName(roadCondition, id, "kondisi");
   const getTypeName = (id: number) => findName(roadType, id, "jenisjalan");
   const getVillageName = (id: number) =>
-    allRegion?.desa.find((d) => d.id === id)?.desa || "-";
+    findName(allRegion?.desa || [], id, "desa");
 
   const applyFilters = () => {
     let filtered = roads;
@@ -294,6 +299,7 @@ export default function Map() {
                 <TableRow>
                   <TableHead>Code</TableHead>
                   <TableHead>Name</TableHead>
+                  <TableHead className="w-[150px]">Description</TableHead>
                   <TableHead>Village</TableHead>
                   <TableHead>Material</TableHead>
                   <TableHead>Condition</TableHead>
@@ -313,6 +319,12 @@ export default function Map() {
                     >
                       <TableCell>{road.kode_ruas}</TableCell>
                       <TableCell>{road.nama_ruas}</TableCell>
+                      <TableCell
+                        className="truncate max-w-[150px] whitespace-nowrap overflow-hidden hover:cursor-pointer"
+                        onClick={() => setDescToShow(road.keterangan)}
+                      >
+                        {road.keterangan}
+                      </TableCell>
                       <TableCell>{getVillageName(road.desa_id)}</TableCell>
                       <TableCell>
                         {getMaterialName(road.eksisting_id)}
@@ -403,6 +415,15 @@ export default function Map() {
               description={`Are you sure you want to delete the road "${roadToDelete?.nama_ruas}"? This action cannot be undone.`}
               onConfirm={handleDelete}
             />
+
+            <ShowDialog
+              open={!!descToShow}
+              onOpenChange={(open) => {
+                if (!open) setDescToShow(null);
+              }}
+              title={"Description"}
+              description={descToShow || "-"}
+            />
           </>
         )}
 
@@ -456,8 +477,6 @@ export default function Map() {
                     Length: {road.panjang / 1000 || "-"} km
                     <br />
                     Width: {road.lebar || "-"} m
-                    <br />
-                    Desc: {road.keterangan || "-"}
                   </div>
                 </Tooltip>
               </Polyline>

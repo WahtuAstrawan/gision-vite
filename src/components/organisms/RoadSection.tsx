@@ -1,5 +1,5 @@
-import ViewMapDialog from '@/components/molecules/ViewMapDialog';
-import { Button } from '@/components/ui/button';
+import ViewMapDialog from "@/components/molecules/ViewMapDialog";
+import { Button } from "@/components/ui/button";
 import {
   Table,
   TableBody,
@@ -7,7 +7,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/table';
+} from "@/components/ui/table";
 import {
   deleteRoadById,
   getAllRegion,
@@ -15,21 +15,22 @@ import {
   getRoadCondition,
   getRoadMaterial,
   getRoadType,
-} from '@/lib/api';
-import { handleApi } from '@/lib/utils';
-import { useAuthStore } from '@/stores/authStore';
-import '@geoman-io/leaflet-geoman-free';
-import '@geoman-io/leaflet-geoman-free/dist/leaflet-geoman.css';
-import 'leaflet/dist/leaflet.css';
-import { Pencil, Plus, Trash } from 'lucide-react';
-import * as React from 'react';
-import { useNavigate } from 'react-router-dom';
-import { toast } from 'sonner';
-import ConfirmDialog from '../atoms/ConfirmDialog';
-import Loading from '../atoms/Loading';
-import { PaginationControls } from '../atoms/PaginationControls';
-import { SearchInputWithClear } from '../atoms/SearchInputWithClear';
-import RoadFormDialog from './RoadFormDialog';
+} from "@/lib/api";
+import { findName, handleApi } from "@/lib/utils";
+import { useAuthStore } from "@/stores/authStore";
+import "@geoman-io/leaflet-geoman-free";
+import "@geoman-io/leaflet-geoman-free/dist/leaflet-geoman.css";
+import "leaflet/dist/leaflet.css";
+import { Pencil, Plus, Trash } from "lucide-react";
+import * as React from "react";
+import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
+import ConfirmDialog from "../atoms/ConfirmDialog";
+import Loading from "../atoms/Loading";
+import { PaginationControls } from "../atoms/PaginationControls";
+import { SearchInputWithClear } from "../atoms/SearchInputWithClear";
+import RoadFormDialog from "./RoadFormDialog";
+import ShowDialog from "../atoms/ShowDialog";
 
 const RoadSection = () => {
   const { token } = useAuthStore();
@@ -43,6 +44,7 @@ const RoadSection = () => {
   const [selectedRoadForEdit, setSelectedRoadForEdit] =
     React.useState<Road | null>(null);
   const [roadToDelete, setRoadToDelete] = React.useState<Road | null>(null);
+  const [descToShow, setDescToShow] = React.useState<string | null>(null);
 
   const [roads, setRoads] = React.useState<Road[]>([]);
   const [roadMaterial, setRoadMaterial] = React.useState<RoadMaterial[]>([]);
@@ -54,18 +56,18 @@ const RoadSection = () => {
 
   const [currentPage, setCurrentPage] = React.useState(1);
   const itemsPerPage = 10;
-  const [searchQuery, setSearchQuery] = React.useState('');
+  const [searchQuery, setSearchQuery] = React.useState("");
   const [filteredRoads, setFilteredRoads] = React.useState<Road[]>([]);
 
   const refreshRoadList = async () => {
     setCurrentPage(1);
     await handleApi(
       getAllRoads,
-      token || '',
+      token || "",
       (res: AllRoadsResponse) => setRoads(res.ruasjalan || []),
       {
         onError: setError,
-        onExpired: () => setTimeout(() => navigate('/'), 2000),
+        onExpired: () => setTimeout(() => navigate("/"), 2000),
       }
     );
   };
@@ -87,23 +89,23 @@ const RoadSection = () => {
   };
 
   const handleClear = () => {
-    setSearchQuery('');
+    setSearchQuery("");
   };
 
   const handleDelete = async () => {
     if (!roadToDelete) return;
 
     try {
-      const res = await deleteRoadById(roadToDelete.id, token || '');
+      const res = await deleteRoadById(roadToDelete.id, token || "");
       if (res.code === 200) {
-        toast.success('Road deleted successfully!');
+        toast.success("Road deleted successfully!");
         refreshRoadList();
       } else {
-        toast.error('Failed to delete road.');
+        toast.error("Failed to delete road.");
       }
     } catch (err) {
       console.error(err);
-      toast.error('An error occurred during deletion.');
+      toast.error("An error occurred during deletion.");
     } finally {
       setRoadToDelete(null);
     }
@@ -115,16 +117,16 @@ const RoadSection = () => {
       await Promise.all([
         handleApi(
           getAllRoads,
-          token || '',
+          token || "",
           (res) => setRoads(res.ruasjalan || []),
           {
             onError: setError,
-            onExpired: () => setTimeout(() => navigate('/'), 2000),
+            onExpired: () => setTimeout(() => navigate("/"), 2000),
           }
         ),
         handleApi(
           getRoadMaterial,
-          token || '',
+          token || "",
           (res) => setRoadMaterial(res.eksisting || []),
           {
             onError: setError,
@@ -132,7 +134,7 @@ const RoadSection = () => {
         ),
         handleApi(
           getRoadType,
-          token || '',
+          token || "",
           (res) => setRoadType(res.eksisting || []),
           {
             onError: setError,
@@ -140,13 +142,13 @@ const RoadSection = () => {
         ),
         handleApi(
           getRoadCondition,
-          token || '',
+          token || "",
           (res) => setRoadCondition(res.eksisting || []),
           {
             onError: setError,
           }
         ),
-        handleApi(getAllRegion, token || '', setAllRegion, {
+        handleApi(getAllRegion, token || "", setAllRegion, {
           onError: setError,
         }),
       ]);
@@ -155,16 +157,13 @@ const RoadSection = () => {
     fetchAll();
   }, []);
 
-  const findName = (list: any[], id: number, key: string) =>
-    list.find((item) => item.id === id)?.[key] || '-';
-
   const getMaterialName = (id: number) =>
-    findName(roadMaterial, id, 'eksisting');
+    findName(roadMaterial, id, "eksisting");
   const getConditionName = (id: number) =>
-    findName(roadCondition, id, 'kondisi');
-  const getTypeName = (id: number) => findName(roadType, id, 'jenisjalan');
+    findName(roadCondition, id, "kondisi");
+  const getTypeName = (id: number) => findName(roadType, id, "jenisjalan");
   const getVillageName = (id: number) =>
-    allRegion?.desa.find((d) => d.id === id)?.desa || '-';
+    findName(allRegion?.desa || [], id, "desa");
   const totalPages = Math.ceil(filteredRoads.length / itemsPerPage);
   const paginatedRoads = filteredRoads.slice(
     (currentPage - 1) * itemsPerPage,
@@ -218,7 +217,10 @@ const RoadSection = () => {
               <TableRow key={road.id}>
                 <TableCell>{road.kode_ruas}</TableCell>
                 <TableCell>{road.nama_ruas}</TableCell>
-                <TableCell className="truncate max-w-[300px] whitespace-nowrap overflow-hidden">
+                <TableCell
+                  className="truncate max-w-[300px] whitespace-nowrap overflow-hidden hover:cursor-pointer"
+                  onClick={() => setDescToShow(road.keterangan)}
+                >
                   {road.keterangan}
                 </TableCell>
                 <TableCell className="text-center">
@@ -320,8 +322,8 @@ const RoadSection = () => {
           onSuccess={() => {
             toast.success(
               selectedRoadForEdit
-                ? 'Road updated successfully!'
-                : 'Road added successfully!'
+                ? "Road updated successfully!"
+                : "Road added successfully!"
             );
             refreshRoadList();
           }}
@@ -340,6 +342,14 @@ const RoadSection = () => {
         title="Delete Road"
         description={`Are you sure you want to delete the road "${roadToDelete?.nama_ruas}"? This action cannot be undone.`}
         onConfirm={handleDelete}
+      />
+      <ShowDialog
+        open={!!descToShow}
+        onOpenChange={(open) => {
+          if (!open) setDescToShow(null);
+        }}
+        title={"Description"}
+        description={descToShow || "-"}
       />
     </>
   );

@@ -1,6 +1,6 @@
-import * as polyline from '@mapbox/polyline';
-import { clsx, type ClassValue } from 'clsx';
-import { twMerge } from 'tailwind-merge';
+import * as polyline from "@mapbox/polyline";
+import { clsx, type ClassValue } from "clsx";
+import { twMerge } from "tailwind-merge";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -9,16 +9,16 @@ export function cn(...inputs: ClassValue[]) {
 export function toTitleCase(str: string): string {
   return str
     .toLowerCase()
-    .split(' ')
+    .split(" ")
     .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-    .join(' ');
+    .join(" ");
 }
 
 export function decodePath(pathString: string): [number, number][] {
   try {
     return polyline.decode(pathString) as [number, number][];
   } catch (e) {
-    console.error('Failed to decode polyline path:', e);
+    console.error("Failed to decode polyline path:", e);
     return [];
   }
 }
@@ -65,14 +65,14 @@ export const handleApi = async <T>(
     }
 
     if (res.code >= 400 && res.code < 500) {
-      options?.onError?.('Login session expired.');
+      options?.onError?.("Login session expired.");
       options?.onExpired?.();
     } else {
-      options?.onError?.('Internal server error.');
+      options?.onError?.("Internal server error.");
     }
   } catch (e) {
-    console.error('API Error:', e);
-    options?.onError?.('An error occurred while loading the data.');
+    console.error("API Error:", e);
+    options?.onError?.("An error occurred while loading the data.");
   }
 };
 
@@ -81,17 +81,17 @@ export const getDashArray = (
 ): string | undefined => {
   switch (kondisiId) {
     case 1:
-      return '';
+      return "";
     case 2:
-      return '6 4';
+      return "6 4";
     case 3:
-      return '2 6';
-    case 'Baik':
-      return '';
-    case 'Sedang':
-      return '6 4';
-    case 'Rusak':
-      return '2 6';
+      return "2 6";
+    case "Baik":
+      return "";
+    case "Sedang":
+      return "6 4";
+    case "Rusak":
+      return "2 6";
     default:
       return undefined;
   }
@@ -100,12 +100,15 @@ export const getDashArray = (
 export const getRoadColor = (jenisjalanId: number) => {
   switch (jenisjalanId) {
     case 3:
-      return 'blue';
+      return "blue";
     case 2:
-      return 'red';
+      return "red";
     case 1:
-      return 'green';
+      return "green";
     default:
-      return 'black';
+      return "black";
   }
 };
+
+export const findName = (list: any[], id: number, key: string) =>
+  list.find((item) => item.id === id)?.[key] || "-";
