@@ -225,6 +225,9 @@ const RoadFormDialog: React.FC<RoadFormDialogProps> = ({
               />
               {decodedPath.length > 0 && (
                 <Polyline
+                  key={`${decodedPath}-${roadColor}-${getDashArray(
+                    selectedCondition
+                  )}`}
                   positions={decodedPath}
                   color={roadColor}
                   dashArray={getDashArray(selectedCondition)}

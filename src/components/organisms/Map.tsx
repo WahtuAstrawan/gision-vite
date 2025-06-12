@@ -391,11 +391,7 @@ export default function Map() {
                   if (!open) setSelectedRoadForEdit(null);
                 }}
                 onSuccess={async () => {
-                  toast.success(
-                    selectedRoadForEdit
-                      ? "Road updated successfully!"
-                      : "Road added successfully!"
-                  );
+                  toast.success("Road updated successfully!");
                   await fetchAllRoads();
                 }}
                 allRegion={allRegion}
@@ -458,11 +454,12 @@ export default function Map() {
 
             return (
               <Polyline
-                key={`${road.id}-${isSelected}`}
+                key={`${road.id}-${isSelected}-${roadColor}-${getDashArray(
+                  road.kondisi_id
+                )}`}
                 positions={decodedPath}
                 color={roadColor}
                 dashArray={getDashArray(road.kondisi_id)}
-                weight={road.jenisjalan_id * 2.8}
                 opacity={isSelected ? 1 : 0.8}
                 eventHandlers={{
                   click: () => {
