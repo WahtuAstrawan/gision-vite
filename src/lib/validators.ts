@@ -1,14 +1,18 @@
 import { z } from "zod";
 
 export const loginSchema = z.object({
-  email: z.string().email({ message: "Email harus valid" }),
-  password: z.string().min(6, { message: "Password minimal 6 karakter" }),
+  email: z.string().email({ message: "Email must be valid" }),
+  password: z
+    .string()
+    .min(6, { message: "Password must be at least 6 characters" }),
 });
 
 export const registerSchema = z.object({
-  name: z.string().min(2, { message: "Nama minimal 2 karakter" }),
-  email: z.string().email({ message: "Email harus valid" }),
-  password: z.string().min(6, { message: "Password minimal 6 karakter" }),
+  name: z.string().min(2, { message: "Name must be at least 2 characters" }),
+  email: z.string().email({ message: "Email must be valid" }),
+  password: z
+    .string()
+    .min(6, { message: "Password must be at least 6 characters" }),
 });
 
 export const roadSchema = z.object({

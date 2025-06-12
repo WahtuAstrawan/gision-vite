@@ -69,7 +69,7 @@ type Road = {
 type AllRoadsResponse = {
   code: number;
   user: User;
-  'token-expired': number;
+  "token-expired": number;
   status: string;
   ruasjalan: Road[];
 };
@@ -81,7 +81,7 @@ type RoadMaterial = {
 
 type RoadMaterialResponse = {
   code: number;
-  'token-expired': number;
+  "token-expired": number;
   status: string;
   eksisting: RoadMaterial[];
 };
@@ -93,7 +93,7 @@ type RoadTypeItem = {
 
 type RoadType = {
   code: number;
-  'token-expired': number;
+  "token-expired": number;
   status: string;
   eksisting: RoadTypeItem[];
 };
@@ -105,7 +105,7 @@ type RoadConditionItem = {
 
 type RoadCondition = {
   code: number;
-  'token-expired': number;
+  "token-expired": number;
   status: string;
   eksisting: RoadConditionItem[];
 };
