@@ -1,8 +1,8 @@
-import '@geoman-io/leaflet-geoman-free';
-import * as polyline from '@mapbox/polyline';
-import * as L from 'leaflet';
-import { useEffect } from 'react';
-import { useMap } from 'react-leaflet';
+import "@geoman-io/leaflet-geoman-free";
+import * as polyline from "@mapbox/polyline";
+import * as L from "leaflet";
+import { useEffect } from "react";
+import { useMap } from "react-leaflet";
 
 interface MapDrawProps {
   setPath: (encodedPath: string) => void;
@@ -18,7 +18,7 @@ export const MapDraw: React.FC<MapDrawProps> = ({ setPath }) => {
     map.addLayer(drawnItems);
 
     map.pm.addControls({
-      position: 'topleft',
+      position: "topleft",
       drawMarker: false,
       drawCircle: false,
       drawRectangle: false,
@@ -27,12 +27,12 @@ export const MapDraw: React.FC<MapDrawProps> = ({ setPath }) => {
       drawText: false,
       drawPolyline: true,
       editMode: true,
-      dragMode: false,
+      dragMode: true,
       cutPolygon: false,
       removalMode: true,
     });
 
-    map.on('pm:create', (e: any) => {
+    map.on("pm:create", (e: any) => {
       drawnItems.clearLayers();
       drawnItems.addLayer(e.layer);
 
@@ -43,8 +43,8 @@ export const MapDraw: React.FC<MapDrawProps> = ({ setPath }) => {
       setPath(encoded);
     });
 
-    map.on('pm:remove', () => {
-      setPath('');
+    map.on("pm:remove", () => {
+      setPath("");
     });
 
     return () => {
